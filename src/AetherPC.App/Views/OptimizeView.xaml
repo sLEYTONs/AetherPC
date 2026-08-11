@@ -1,0 +1,357 @@
+<UserControl x:Class="AetherPC.App.Views.OptimizeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:s="clr-namespace:AetherPC.App.Services"
+             xmlns:conv="clr-namespace:AetherPC.App.Converters">
+  <UserControl.Resources>
+    <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    <conv:NullToVisibilityConverter x:Key="NullToVis" />
+    <conv:InverseBoolConverter x:Key="InvertBool" />
+  </UserControl.Resources>
+
+  <Grid HorizontalAlignment="Stretch">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+
+    <!-- Encabezado limpio (oculto al aplicar / resultado) -->
+    <Border Grid.Row="0" Style="{StaticResource PageHeaderBar}"
+            Visibility="{Binding ShowPageChrome, Converter={StaticResource BoolToVis}}">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Column="0" Style="{StaticResource PageHeaderTextColumn}">
+          <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Page.Optimize]}"
+                     Style="{StaticResource PageTitle}" />
+          <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Optimize.Blurb]}"
+                     Style="{StaticResource PageBlurb}" />
+          <TextBlock Text="{Binding ProgressText}"
+                     Foreground="{DynamicResource BrushAccent}"
+                     FontSize="12" FontWeight="SemiBold"
+                     Margin="0,6,0,0" TextWrapping="Wrap"
+                     Visibility="{Binding IsAnalyzing, Converter={StaticResource BoolToVis}}" />
+        </StackPanel>
+        <Button Grid.Column="1"
+                Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Common.Analyze]}"
+                Style="{StaticResource HeaderActionButton}"
+                IsEnabled="{Binding IsAnalyzing, Converter={StaticResource InvertBool}}"
+                Click="BtnAnalyze_OnClick" />
+      </Grid>
+    </Border>
+
+    <!-- Área de contenido (pasos del wizard) -->
+    <Grid Grid.Row="1">
+
+      <!-- Inicio -->
+      <Border Style="{StaticResource GlassCardLite}" Padding="32,40"
+              Visibility="{Binding IsStepStart, Converter={StaticResource BoolToVis}}">
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="420">
+          <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Optimize.EmptyTitle]}"
+                     Foreground="{DynamicResource BrushText}"
+                     FontSize="20" FontWeight="SemiBold"
+                     FontFamily="Segoe UI Variable Display, Segoe UI"
+                     TextAlignment="Center" />
+          <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Optimize.EmptyBody]}"
+                     Style="{StaticResource MutedText}"
+                     TextAlignment="Center" TextWrapping="Wrap"
+                     Margin="0,12,0,24" LineHeight="20" />
+          <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Common.Analyze]}"
+                  Style="{StaticResource HeaderSuccessButton}"
+                  HorizontalAlignment="Center"
+                  MinWidth="168" MinHeight="40" Padding="24,10"
+                  IsEnabled="{Binding IsAnalyzing, Converter={StaticResource InvertBool}}"
+                  Click="BtnAnalyze_OnClick" />
+        </StackPanel>
+      </Border>
+
+      <!-- Resultados del análisis -->
+      <Border Style="{StaticResource GlassCardLite}" Padding="14"
+              Visibility="{Binding IsStepResults, Converter={StaticResource BoolToVis}}">
+        <DockPanel>
+          <DockPanel DockPanel.Dock="Bottom" Margin="0,12,0,0" LastChildFill="False">
+            <TextBlock DockPanel.Dock="Left" Text="{Binding HardwareSummary}"
+                       Style="{StaticResource MutedText}" VerticalAlignment="Center"
+                       TextWrapping="Wrap" MaxWidth="560" Margin="0,0,12,0" />
+            <Button DockPanel.Dock="Right"
+                    Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Optimize.GoToPlan]}"
+                    Command="{Binding GoToPlanCommand}"
+                    Style="{StaticResource HeaderSuccessButton}"
+                    HorizontalAlignment="Right" />
+          </DockPanel>
+          <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+              <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Optimize.ResultsTitle]}"
+                         FontWeight="SemiBold" Foreground="{DynamicResource BrushText}" FontSize="14" />
+              <TextBlock Text="{Binding HardwareProfileText}" Style="{StaticResource MutedText}" TextWrapping="Wrap"
+                         Margin="0,6,0,12" />
+              <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Optimize.WinState]}"
+                         FontWeight="SemiBold" Foreground="{DynamicResource BrushText}" FontSize="13" />
+              <TextBlock Text="{Binding SystemStateSummary}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,4,0,12" />
+              <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Optimize.HealthFactors]}"
+                         FontWeight="SemiBold" Foreground="{DynamicResource BrushText}" FontSize="13" />
+              <TextBlock Text="{Binding HealthBreakdown}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,4,0,0"
+                         FontFamily="Consolas" FontSize="11" />
+            </StackPanel>
+          </ScrollViewer>
+        </DockPanel>
+      </Border>
+
+      <!-- Plan -->
+      <Grid Visibility="{Binding IsStepPlan, Converter={StaticResource BoolToVis}}">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="*" />
+          <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Margin="4,0,4,8">
+          <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Optimize.RecommendedHint]}"
+                     Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="2,0,0,10" FontSize="12" />
+          <WrapPanel>
+            <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Optimize.FilterAll]}"
+                    Command="{Binding SetListFilterCommand}" CommandParameter="all" Style="{StaticResource SortChipButton}" />
+            <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Common.Safe]}"
+                    Command="{Binding SetListFilterCommand}" CommandParameter="safe" Style="{StaticResource SortChipButton}" />
+            <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Common.Recommended]}"
+                    Command="{Binding SetListFilterCommand}" CommandParameter="recommended" Style="{StaticResource SortChipButton}" />
+            <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Optimize.FilterReboot]}"
+                    Command="{Binding SetListFilterCommand}" CommandParameter="reboot" Style="{StaticResource SortChipButton}" />
+          </WrapPanel>
+          <DockPanel Margin="2,4,0,0" LastChildFill="False">
+            <Button DockPanel.Dock="Left"
+                    Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Optimize.SortGainBtn]}"
+                    Command="{Binding ToggleSortByGainCommand}" Style="{StaticResource SortOptionButton}"
+                    ToolTip="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Optimize.SortGainTip]}" />
+            <Button DockPanel.Dock="Left"
+                    Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Beast.SelectAll]}"
+                    Command="{Binding SelectVisibleCommand}" Style="{StaticResource ActionOptionButton}" />
+            <TextBox DockPanel.Dock="Right" Width="220" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{StaticResource SearchTextBox}" VerticalAlignment="Center" Margin="12,0,0,4"
+                     ToolTip="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Optimize.Search]}" />
+          </DockPanel>
+        </StackPanel>
+        <Border Grid.Row="1" Background="{DynamicResource BrushSurface}" CornerRadius="10"
+                BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1" Padding="2">
+          <ListBox ItemsSource="{Binding VisibleActions}"
+                   ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                   ScrollViewer.VerticalScrollBarVisibility="Auto"
+                   ScrollViewer.CanContentScroll="False"
+                   ScrollViewer.PanningMode="VerticalOnly"
+                   VirtualizingPanel.IsVirtualizing="True"
+                   VirtualizingPanel.VirtualizationMode="Recycling"
+                   VirtualizingPanel.ScrollUnit="Pixel">
+            <ListBox.ItemsPanel>
+              <ItemsPanelTemplate>
+                <VirtualizingStackPanel />
+              </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+            <ListBox.ItemContainerStyle>
+              <Style TargetType="ListBoxItem">
+                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="Margin" Value="0" />
+                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                <Setter Property="Template">
+                  <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                      <ContentPresenter />
+                    </ControlTemplate>
+                  </Setter.Value>
+                </Setter>
+              </Style>
+            </ListBox.ItemContainerStyle>
+            <ListBox.ItemTemplate>
+              <DataTemplate>
+                <Border Background="{DynamicResource BrushRow}" CornerRadius="8" Margin="3,2" Padding="10,8"
+                        BorderBrush="{DynamicResource BrushBorderSubtle}" BorderThickness="1">
+                  <Grid>
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="Auto" />
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                              IsEnabled="{Binding CanSelect}" VerticalAlignment="Top" Margin="0,2,10,0" />
+                    <StackPanel Grid.Column="1">
+                      <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" FontSize="13"
+                                 Foreground="{DynamicResource BrushText}" TextWrapping="Wrap" />
+                      <TextBlock Text="{Binding StateLine}" FontSize="12.5" Foreground="{DynamicResource BrushAccent}" Margin="0,3,0,0" />
+                      <TextBlock Text="{Binding SimpleWhat}" TextWrapping="Wrap" FontSize="13"
+                                 Foreground="{DynamicResource BrushSecondaryText}" Margin="0,4,0,0" />
+                      <WrapPanel Margin="0,6,0,0">
+                        <Border Background="#22000000" CornerRadius="5" Padding="6,1" Margin="0,0,5,3"
+                                BorderThickness="1" BorderBrush="{DynamicResource BrushMuted}">
+                          <TextBlock Text="{Binding RiskLabel}" FontSize="12" Foreground="{DynamicResource BrushMuted}" />
+                        </Border>
+                        <Border Background="#223BA4FF" CornerRadius="5" Padding="6,1" Margin="0,0,5,3">
+                          <TextBlock Text="{Binding Category}" FontSize="12" Foreground="{DynamicResource BrushAccent}" />
+                        </Border>
+                        <Border Background="#221F6FEB" CornerRadius="5" Padding="6,1" Margin="0,0,5,3">
+                          <TextBlock Text="{Binding ImpactLabel}" FontSize="12" Foreground="{DynamicResource BrushText}" />
+                        </Border>
+                        <TextBlock Text="{Binding LastResult}" FontSize="12" Foreground="{DynamicResource BrushOk}"
+                                   Visibility="{Binding LastResult, Converter={StaticResource NullToVis}}" />
+                      </WrapPanel>
+                    </StackPanel>
+                    <Border Grid.Column="2" Style="{StaticResource ActionGainBadge}" VerticalAlignment="Top">
+                      <TextBlock Text="{Binding GainLabel}" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource BrushOk}" />
+                    </Border>
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+        </Border>
+        <Border Grid.Row="2" Background="{DynamicResource BrushFooter}" BorderBrush="{DynamicResource BrushBorder}"
+                BorderThickness="0,1,0,0" Padding="12,8" Margin="0,6,0,0">
+          <DockPanel>
+            <Button DockPanel.Dock="Right"
+                    Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Optimize.ReviewSelection]}"
+                    Style="{StaticResource HeaderSuccessButton}" Command="{Binding GoToConfirmCommand}" Margin="10,0,0,0" />
+            <TextBlock Text="{Binding SelectionSummary}" VerticalAlignment="Center"
+                       Foreground="{DynamicResource BrushText}" FontWeight="SemiBold" FontSize="12" TextWrapping="Wrap" />
+          </DockPanel>
+        </Border>
+      </Grid>
+
+      <!-- Confirmación -->
+      <Border Style="{StaticResource GlassCardLite}" Padding="14"
+              Visibility="{Binding IsStepConfirm, Converter={StaticResource BoolToVis}}">
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+            <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Optimize.BackToPlan]}"
+                    Command="{Binding BackToPlanCommand}" Style="{StaticResource SecondaryBlueButton}" Margin="0,0,8,0" />
+            <CheckBox Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Optimize.CreateRp]}"
+                      IsChecked="{Binding CreateRestorePoint}"
+                      VerticalAlignment="Center" Margin="0,0,12,0" Foreground="{DynamicResource BrushText}" />
+            <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Common.ApplyNow]}"
+                    Style="{StaticResource HeaderSuccessButton}" Click="BtnApply_OnClick" />
+          </StackPanel>
+          <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <TextBlock Text="{Binding ConfirmPreview}" TextWrapping="Wrap" FontFamily="Consolas" FontSize="12"
+                       Foreground="{DynamicResource BrushText}" LineHeight="17" />
+          </ScrollViewer>
+        </DockPanel>
+      </Border>
+
+    </Grid>
+
+    <!-- Progreso: overlay centrado en todo el área de la página -->
+    <Grid Grid.Row="0" Grid.RowSpan="2" Panel.ZIndex="20"
+          Visibility="{Binding IsStepProgress, Converter={StaticResource BoolToVis}}"
+          Background="{DynamicResource BrushBg}"
+          HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+      <Border MaxWidth="560" MinWidth="280" Margin="24"
+              VerticalAlignment="Center" HorizontalAlignment="Center"
+              Background="{DynamicResource BrushSurface}" CornerRadius="18"
+              BorderBrush="#663BA4FF" BorderThickness="1" Padding="36,40">
+        <Border.Effect>
+          <DropShadowEffect BlurRadius="28" ShadowDepth="0" Opacity="0.35" Color="#FF000000" />
+        </Border.Effect>
+        <StackPanel>
+          <Border Width="72" Height="72" CornerRadius="36" HorizontalAlignment="Center" Margin="0,0,0,20"
+                  Background="#223BA4FF" BorderBrush="#FF3BA4FF" BorderThickness="2">
+            <TextBlock Text="&#xE945;" FontFamily="Segoe MDL2 Assets" FontSize="32"
+                       Foreground="#FF3BA4FF" HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Border>
+          <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Optimize.ApplyingTitle]}"
+                     FontSize="26" FontWeight="Bold" Foreground="{DynamicResource BrushText}"
+                     HorizontalAlignment="Center" TextAlignment="Center" />
+          <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Optimize.ApplyingHint]}"
+                     FontSize="13" Foreground="{DynamicResource BrushSecondaryText}"
+                     HorizontalAlignment="Center" TextAlignment="Center" Margin="0,8,0,22" TextWrapping="Wrap" />
+
+          <ProgressBar Height="10" Maximum="100" Value="{Binding ProgressPercent}"
+                       Foreground="#FF3BA4FF" Background="{DynamicResource BrushRow}" Margin="0,0,0,10" />
+          <DockPanel Margin="0,0,0,18">
+            <TextBlock DockPanel.Dock="Right" Text="{Binding ApplyCountLabel}"
+                       FontWeight="Bold" FontSize="13" Foreground="#FF3BA4FF" />
+            <TextBlock Text="{Binding ProgressPercent, StringFormat={}{0:0}%}"
+                       FontSize="13" Foreground="{DynamicResource BrushMuted}" />
+          </DockPanel>
+
+          <Border Background="{DynamicResource BrushRow}" CornerRadius="12" Padding="16,14"
+                  BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1">
+            <StackPanel>
+              <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Optimize.ApplyingNow]}"
+                         FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource BrushMuted}" Margin="0,0,0,4" />
+              <TextBlock Text="{Binding CurrentActionTitle}" FontSize="15" FontWeight="SemiBold"
+                         Foreground="{DynamicResource BrushText}" TextWrapping="Wrap" />
+              <TextBlock Text="{Binding CurrentActionDetail}" FontSize="12"
+                         Foreground="{DynamicResource BrushSecondaryText}" TextWrapping="Wrap" Margin="0,6,0,0" />
+            </StackPanel>
+          </Border>
+
+          <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Common.Cancel]}"
+                  Command="{Binding CancelApplyCommand}" Style="{StaticResource TertiaryButton}"
+                  HorizontalAlignment="Center" Margin="0,22,0,0" Padding="16,6" />
+        </StackPanel>
+      </Border>
+    </Grid>
+
+    <!-- Resultado: overlay centrado -->
+    <Grid Grid.Row="0" Grid.RowSpan="2" Panel.ZIndex="20"
+          Visibility="{Binding IsStepDone, Converter={StaticResource BoolToVis}}"
+          Background="{DynamicResource BrushBg}"
+          HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+      <Border MaxWidth="640" MinWidth="280" Margin="24"
+              VerticalAlignment="Center" HorizontalAlignment="Center"
+              Background="{DynamicResource BrushSurface}" CornerRadius="18"
+              BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1" Padding="32,36">
+        <StackPanel HorizontalAlignment="Stretch">
+          <Border Width="64" Height="64" CornerRadius="32" HorizontalAlignment="Center" Margin="0,0,0,16"
+                  Background="#223DDC97" BorderBrush="#FF3DDC97" BorderThickness="2"
+                  Visibility="{Binding HasApplyErrors, Converter={StaticResource InvertBool}}">
+            <TextBlock Text="&#xE73E;" FontFamily="Segoe MDL2 Assets" FontSize="28"
+                       Foreground="#FF3DDC97" HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Border>
+          <Border Width="64" Height="64" CornerRadius="32" HorizontalAlignment="Center" Margin="0,0,0,16"
+                  Background="#33F0A202" BorderBrush="#FFF0A202" BorderThickness="2"
+                  Visibility="{Binding HasApplyErrors, Converter={StaticResource BoolToVis}}">
+            <TextBlock Text="&#xE7BA;" FontFamily="Segoe MDL2 Assets" FontSize="28"
+                       Foreground="#FFF0A202" HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Border>
+          <TextBlock Text="{Binding ResultHeadline}" FontSize="24" FontWeight="Bold"
+                     Foreground="{DynamicResource BrushText}" HorizontalAlignment="Center" TextAlignment="Center" />
+          <TextBlock Text="{Binding ResultSubtitle}" FontSize="14"
+                     Foreground="{DynamicResource BrushSecondaryText}" HorizontalAlignment="Center"
+                     TextAlignment="Center" Margin="0,8,0,16" TextWrapping="Wrap" />
+
+          <WrapPanel HorizontalAlignment="Center" Margin="0,0,0,16">
+            <Border Background="#223DDC97" CornerRadius="10" Padding="14,8" Margin="0,0,8,0">
+              <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Optimize.ResultOk]}" FontSize="12"
+                           Foreground="{DynamicResource BrushMuted}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding ApplyOkCount}" FontSize="18" FontWeight="Bold" Foreground="#FF3DDC97" />
+              </StackPanel>
+            </Border>
+            <Border Background="#33F0A202" CornerRadius="10" Padding="14,8">
+              <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Optimize.ResultFail]}" FontSize="12"
+                           Foreground="{DynamicResource BrushMuted}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding ApplyFailCount}" FontSize="18" FontWeight="Bold" Foreground="#FFF0A202" />
+              </StackPanel>
+            </Border>
+          </WrapPanel>
+
+          <Border Background="{DynamicResource BrushRow}" CornerRadius="12" Padding="14" MaxHeight="180"
+                  BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+              <TextBlock Text="{Binding FinalReport}" FontSize="12" Foreground="{DynamicResource BrushSecondaryText}"
+                         TextWrapping="Wrap" LineHeight="18" />
+            </ScrollViewer>
+          </Border>
+
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
+            <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Optimize.BackToPlan]}"
+                    Command="{Binding BackToPlanCommand}" Style="{StaticResource SecondaryBlueButton}" Margin="0,0,8,0" />
+            <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Optimize.NewAnalysis]}"
+                    Style="{StaticResource HeaderActionButton}" Click="BtnAnalyze_OnClick" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </Grid>
+  </Grid>
+</UserControl>

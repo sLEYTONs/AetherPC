@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>AetherPC.Infrastructure</RootNamespace>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="LibreHardwareMonitorLib" Version="0.9.4" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.11" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
+    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="8.0.1" />
+    <PackageReference Include="System.Management" Version="9.0.0" />
+    <PackageReference Include="System.ServiceProcess.ServiceController" Version="8.0.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AetherPC.Application\AetherPC.Application.csproj" />
+    <ProjectReference Include="..\AetherPC.Core\AetherPC.Core.csproj" />
+  </ItemGroup>
+</Project>

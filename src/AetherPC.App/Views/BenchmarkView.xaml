@@ -1,0 +1,261 @@
+<UserControl x:Class="AetherPC.App.Views.BenchmarkView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:s="clr-namespace:AetherPC.App.Services"
+             xmlns:conv="clr-namespace:AetherPC.App.Converters"
+             Loaded="BenchmarkView_OnLoaded">
+  <UserControl.Resources>
+    <BooleanToVisibilityConverter x:Key="BoolVis" />
+    <conv:InverseBoolConverter x:Key="InvertBool" />
+    <conv:InverseBoolConverter x:Key="InvertBoolToVis" />
+  </UserControl.Resources>
+
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <StackPanel Margin="0,0,8,12">
+      <Border Style="{StaticResource PageHeaderBar}">
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <StackPanel>
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Page.Benchmark]}" Style="{StaticResource PageTitle}" />
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Diag.Blurb]}"
+                       Style="{StaticResource PageBlurb}" Margin="0,2,0,0" TextWrapping="Wrap" />
+            <TextBlock Text="{Binding Status}" Foreground="{DynamicResource BrushAccent}" FontSize="12" Margin="0,6,0,0" TextWrapping="Wrap" />
+            <TextBlock Text="{Binding ProgressText}" Style="{StaticResource MutedText}" FontSize="11" Margin="0,2,0,0" />
+          </StackPanel>
+          <WrapPanel Grid.Column="1" Style="{StaticResource ButtonRowPanel}" VerticalAlignment="Top" HorizontalAlignment="Right">
+            <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Diag.Cancel]}" Command="{Binding CancelCommand}"
+                    Style="{StaticResource TertiaryButton}" Margin="0,0,0,6"
+                    Visibility="{Binding Busy, Converter={StaticResource BoolVis}}" />
+          </WrapPanel>
+        </Grid>
+      </Border>
+
+      <WrapPanel Style="{StaticResource ButtonRowPanel}" Margin="0,0,0,8">
+        <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Diag.Tab.Summary]}" Command="{Binding SelectSectionCommand}" CommandParameter="summary" Style="{StaticResource SortChipButton}" />
+        <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Diag.Tab.Bottlenecks]}" Command="{Binding SelectSectionCommand}" CommandParameter="bottlenecks" Style="{StaticResource SortChipButton}" />
+        <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Diag.Tab.Tests]}" Command="{Binding SelectSectionCommand}" CommandParameter="tests" Style="{StaticResource SortChipButton}" />
+        <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Diag.Tab.Compare]}" Command="{Binding SelectSectionCommand}" CommandParameter="compare" Style="{StaticResource SortChipButton}" />
+      </WrapPanel>
+
+      <StackPanel Visibility="{Binding IsSummary, Converter={StaticResource BoolVis}}">
+        <Border Style="{StaticResource GlassCardLite}">
+          <StackPanel>
+            <TextBlock Text="{Binding SummaryText}" Foreground="{DynamicResource BrushText}" TextWrapping="Wrap" />
+            <TextBlock Text="{Binding PrimaryLimit}" FontWeight="SemiBold" Foreground="{DynamicResource BrushWarn}" Margin="0,8,0,0" TextWrapping="Wrap" />
+            <TextBlock Text="{Binding SecondaryLimit}" Style="{StaticResource MutedText}" Margin="0,4,0,0" TextWrapping="Wrap" />
+          </StackPanel>
+        </Border>
+        <UniformGrid Columns="3">
+          <Border Style="{StaticResource GlassCardLite}" Margin="0,0,6,0">
+            <StackPanel>
+              <TextBlock Text="CPU" Style="{StaticResource MutedText}" />
+              <TextBlock Text="{Binding LastCpu}" Foreground="{DynamicResource BrushText}" TextWrapping="Wrap" FontSize="12" />
+            </StackPanel>
+          </Border>
+          <Border Style="{StaticResource GlassCardLite}" Margin="0,0,6,0">
+            <StackPanel>
+              <TextBlock Text="RAM" Style="{StaticResource MutedText}" />
+              <TextBlock Text="{Binding LastRam}" Foreground="{DynamicResource BrushText}" TextWrapping="Wrap" FontSize="12" />
+            </StackPanel>
+          </Border>
+          <Border Style="{StaticResource GlassCardLite}">
+            <StackPanel>
+              <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Diag.Disk]}" Style="{StaticResource MutedText}" />
+              <TextBlock Text="{Binding LastDisk}" Foreground="{DynamicResource BrushText}" TextWrapping="Wrap" FontSize="12" />
+            </StackPanel>
+          </Border>
+        </UniformGrid>
+        <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Diag.GpuUnavailable]}"
+                   Style="{StaticResource MutedText}" Margin="0,8,0,0" TextWrapping="Wrap" />
+      </StackPanel>
+
+      <StackPanel Visibility="{Binding IsBottlenecks, Converter={StaticResource BoolVis}}">
+        <ItemsControl ItemsSource="{Binding Bottlenecks}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <Border Style="{StaticResource AetherListRow}">
+                <StackPanel>
+                  <TextBlock Text="{Binding Title}" FontWeight="SemiBold" Foreground="{DynamicResource BrushText}" TextWrapping="Wrap" />
+                  <TextBlock Text="{Binding Evidence}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,4,0,0" />
+                  <TextBlock Text="{Binding Recommendation}" Style="{StaticResource MutedText}" FontSize="11" Margin="0,2,0,0" TextWrapping="Wrap" />
+                  <TextBlock Style="{StaticResource MutedText}" FontSize="11" Margin="0,2,0,0">
+                    <Run Text="{Binding Area, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding Severity, Mode=OneWay}"/>
+                    <Run Text=" · "/><Run Text="{Binding Confidence, Mode=OneWay}"/>
+                  </TextBlock>
+                </StackPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+
+      <StackPanel Visibility="{Binding IsTests, Converter={StaticResource BoolVis}}">
+        <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Diag.TestsHint]}"
+                   Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,0,0,8" />
+        <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Diag.RunAll]}"
+                Command="{Binding RunAllCommand}" Style="{StaticResource SuccessButton}"
+                HorizontalAlignment="Left" MinWidth="220" MaxWidth="420" Padding="18,10"
+                IsEnabled="{Binding Busy, Converter={StaticResource InvertBool}}" />
+
+        <Border Style="{StaticResource GlassCardLite}" Margin="0,12,0,0"
+                Visibility="{Binding Busy, Converter={StaticResource BoolVis}}">
+          <StackPanel>
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Diag.LiveMeters]}" FontWeight="SemiBold"
+                       Foreground="{DynamicResource BrushText}" Margin="0,0,0,8" />
+            <ProgressBar Height="8" Maximum="100" Value="{Binding LiveProgress}" Margin="0,0,0,10"
+                         Foreground="{DynamicResource BrushAccent}" IsIndeterminate="{Binding LiveIndeterminate}" />
+            <UniformGrid Columns="3">
+              <StackPanel Margin="0,0,8,0">
+                <TextBlock Text="CPU" Style="{StaticResource MutedText}" />
+                <TextBlock Text="{Binding LiveCpuText}" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource BrushText}" />
+                <ProgressBar Height="4" Maximum="100" Value="{Binding LiveCpu}" Margin="0,4,0,0" />
+              </StackPanel>
+              <StackPanel Margin="0,0,8,0">
+                <TextBlock Text="RAM" Style="{StaticResource MutedText}" />
+                <TextBlock Text="{Binding LiveRamText}" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource BrushText}" />
+                <ProgressBar Height="4" Maximum="100" Value="{Binding LiveRam}" Margin="0,4,0,0" />
+              </StackPanel>
+              <StackPanel>
+                <TextBlock Text="GPU" Style="{StaticResource MutedText}" />
+                <TextBlock Text="{Binding LiveGpuText}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource BrushText}" TextWrapping="Wrap" />
+              </StackPanel>
+            </UniformGrid>
+            <TextBlock Text="{Binding LiveDetail}" Style="{StaticResource MutedText}" Margin="0,10,0,0" TextWrapping="Wrap" />
+          </StackPanel>
+        </Border>
+
+        <Border Style="{StaticResource GlassCardLite}" Margin="0,10,0,0"
+                Visibility="{Binding HasLastRun, Converter={StaticResource BoolVis}}">
+          <StackPanel>
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Diag.LastRun]}" FontWeight="SemiBold"
+                       Foreground="{DynamicResource BrushText}" Margin="0,0,0,6" />
+            <TextBlock Text="{Binding LastRunSummary}" Foreground="{DynamicResource BrushAccent}" TextWrapping="Wrap" />
+          </StackPanel>
+        </Border>
+
+        <Border Style="{StaticResource GlassCardLite}" Margin="0,10,0,0">
+          <StackPanel>
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Diag.TrendTitle]}"
+                       FontWeight="SemiBold" Foreground="{DynamicResource BrushText}" Margin="0,0,0,10" />
+
+            <Grid Margin="0,0,0,12">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="44" />
+                <ColumnDefinition Width="*" />
+              </Grid.ColumnDefinitions>
+              <StackPanel VerticalAlignment="Bottom" Height="96" Margin="0,0,6,0">
+                <TextBlock Text="CPU" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource BrushAccent}" />
+                <TextBlock Text="{Binding LastCpuShort}" Style="{StaticResource MutedText}" FontSize="10" TextWrapping="Wrap" Margin="0,2,0,0" />
+              </StackPanel>
+              <Border Grid.Column="1" Height="96" CornerRadius="10" Padding="10,10,10,8"
+                      Background="{DynamicResource BrushSurfaceSoft}" BorderBrush="{DynamicResource BrushBorderSubtle}" BorderThickness="1">
+                <Grid>
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                  </Grid.RowDefinitions>
+                  <ItemsControl ItemsSource="{Binding CpuTrend}" Height="72" VerticalAlignment="Bottom">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate>
+                        <UniformGrid Rows="1" />
+                      </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <Grid Margin="2,0" Height="72" ToolTip="{Binding Tip}">
+                          <Border VerticalAlignment="Bottom" CornerRadius="4,4,2,2" MinHeight="4"
+                                  Height="{Binding BarHeight}"
+                                  Background="{DynamicResource BrushAccent}" Opacity="0.95" />
+                        </Grid>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                  <TextBlock Grid.Row="1" Text="{Binding CpuTrendEmpty}" Style="{StaticResource MutedText}"
+                             FontSize="11" Margin="0,6,0,0" HorizontalAlignment="Center"
+                             Visibility="{Binding HasCpuTrend, Converter={StaticResource InvertBoolToVis}}" />
+                </Grid>
+              </Border>
+            </Grid>
+
+            <Grid Margin="0,0,0,12">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="44" />
+                <ColumnDefinition Width="*" />
+              </Grid.ColumnDefinitions>
+              <StackPanel VerticalAlignment="Bottom" Height="96" Margin="0,0,6,0">
+                <TextBlock Text="RAM" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource BrushOk}" />
+                <TextBlock Text="{Binding LastRamShort}" Style="{StaticResource MutedText}" FontSize="10" TextWrapping="Wrap" Margin="0,2,0,0" />
+              </StackPanel>
+              <Border Grid.Column="1" Height="96" CornerRadius="10" Padding="10,10,10,8"
+                      Background="{DynamicResource BrushSurfaceSoft}" BorderBrush="{DynamicResource BrushBorderSubtle}" BorderThickness="1">
+                <Grid>
+                  <ItemsControl ItemsSource="{Binding RamTrend}" Height="72" VerticalAlignment="Bottom">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate>
+                        <UniformGrid Rows="1" />
+                      </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <Grid Margin="2,0" Height="72" ToolTip="{Binding Tip}">
+                          <Border VerticalAlignment="Bottom" CornerRadius="4,4,2,2" MinHeight="4"
+                                  Height="{Binding BarHeight}"
+                                  Background="{DynamicResource BrushOk}" Opacity="0.95" />
+                        </Grid>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                  <TextBlock Text="{Binding RamTrendEmpty}" Style="{StaticResource MutedText}"
+                             FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center"
+                             Visibility="{Binding HasRamTrend, Converter={StaticResource InvertBoolToVis}}" />
+                </Grid>
+              </Border>
+            </Grid>
+
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="44" />
+                <ColumnDefinition Width="*" />
+              </Grid.ColumnDefinitions>
+              <StackPanel VerticalAlignment="Bottom" Height="96" Margin="0,0,6,0">
+                <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Diag.Disk]}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource BrushWarn}" />
+                <TextBlock Text="{Binding LastDiskShort}" Style="{StaticResource MutedText}" FontSize="10" TextWrapping="Wrap" Margin="0,2,0,0" />
+              </StackPanel>
+              <Border Grid.Column="1" Height="96" CornerRadius="10" Padding="10,10,10,8"
+                      Background="{DynamicResource BrushSurfaceSoft}" BorderBrush="{DynamicResource BrushBorderSubtle}" BorderThickness="1">
+                <Grid>
+                  <ItemsControl ItemsSource="{Binding DiskTrend}" Height="72" VerticalAlignment="Bottom">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate>
+                        <UniformGrid Rows="1" />
+                      </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <Grid Margin="2,0" Height="72" ToolTip="{Binding Tip}">
+                          <Border VerticalAlignment="Bottom" CornerRadius="4,4,2,2" MinHeight="4"
+                                  Height="{Binding BarHeight}"
+                                  Background="{DynamicResource BrushWarn}" Opacity="0.95" />
+                        </Grid>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                  <TextBlock Text="{Binding DiskTrendEmpty}" Style="{StaticResource MutedText}"
+                             FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center"
+                             Visibility="{Binding HasDiskTrend, Converter={StaticResource InvertBoolToVis}}" />
+                </Grid>
+              </Border>
+            </Grid>
+          </StackPanel>
+        </Border>
+      </StackPanel>
+
+      <Border Style="{StaticResource GlassCardLite}" Visibility="{Binding IsCompare, Converter={StaticResource BoolVis}}">
+        <TextBlock Text="{Binding CompareText}" Foreground="{DynamicResource BrushText}" TextWrapping="Wrap" />
+      </Border>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

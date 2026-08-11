@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>BuildAppIcon</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Drawing.Common" Version="8.0.8" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <!-- Solo satélites ES/EN: la app no usa otros idiomas del runtime .NET. -->
+    <SatelliteResourceLanguages>en;es</SatelliteResourceLanguages>
+  </PropertyGroup>
+</Project>

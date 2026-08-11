@@ -1,0 +1,35 @@
+<UserControl x:Class="AetherPC.App.Views.WelcomeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:s="clr-namespace:AetherPC.App.Services">
+  <Grid Background="{DynamicResource HeroGradient}"
+        HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+    <Border MaxWidth="560" VerticalAlignment="Center" HorizontalAlignment="Center"
+            Background="{DynamicResource BrushSurface}" CornerRadius="18"
+            BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1" Padding="36,40" Margin="24">
+      <StackPanel HorizontalAlignment="Center">
+        <TextBlock Text="AetherPC" FontSize="32" FontWeight="Bold"
+                   Foreground="{DynamicResource BrushAccent}" HorizontalAlignment="Center" TextAlignment="Center" />
+        <TextBlock Text="{Binding Title}" FontSize="22" FontWeight="SemiBold"
+                   Foreground="{DynamicResource BrushText}" HorizontalAlignment="Center"
+                   TextAlignment="Center" Margin="0,16,0,0" TextWrapping="Wrap" />
+        <TextBlock Text="{Binding Body}" FontSize="14"
+                   Foreground="{DynamicResource BrushSecondaryText}" HorizontalAlignment="Center"
+                   TextAlignment="Center" Margin="0,12,0,24" TextWrapping="Wrap" />
+
+        <UniformGrid Columns="2" Margin="0,0,0,20" HorizontalAlignment="Center" Width="280">
+          <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Welcome.LangEs]}"
+                  Command="{Binding SetLanguageCommand}" CommandParameter="es"
+                  Style="{StaticResource SortChipButton}" Margin="0,0,8,0" Height="40" />
+          <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Welcome.LangEn]}"
+                  Command="{Binding SetLanguageCommand}" CommandParameter="en"
+                  Style="{StaticResource SortChipButton}" Margin="0" Height="40" />
+        </UniformGrid>
+
+        <Button Content="{Binding StartLabel}" Command="{Binding StartCommand}"
+                Style="{StaticResource HeaderSuccessButton}" HorizontalAlignment="Center"
+                MinWidth="200" Height="42" />
+      </StackPanel>
+    </Border>
+  </Grid>
+</UserControl>

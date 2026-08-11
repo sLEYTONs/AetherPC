@@ -1,0 +1,360 @@
+<UserControl x:Class="AetherPC.App.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:s="clr-namespace:AetherPC.App.Services"
+             Loaded="SettingsView_OnLoaded">
+  <UserControl.Resources>
+    <BooleanToVisibilityConverter x:Key="BoolVis" />
+
+    <Style x:Key="SettingsNavButton" TargetType="Button" BasedOn="{StaticResource FilterChipButton}">
+      <Setter Property="HorizontalContentAlignment" Value="Left" />
+      <Setter Property="Margin" Value="0,0,0,4" />
+      <Setter Property="Padding" Value="10,8" />
+      <Setter Property="MinWidth" Value="0" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Style.Triggers>
+        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+          <Setter Property="Background" Value="{DynamicResource BrushBtnFilterActiveBg}" />
+          <Setter Property="Foreground" Value="{DynamicResource BrushBtnFilterActiveFg}" />
+          <Setter Property="BorderBrush" Value="{DynamicResource BrushBtnFilterActiveBorder}" />
+          <Setter Property="FontWeight" Value="SemiBold" />
+        </DataTrigger>
+      </Style.Triggers>
+    </Style>
+    <Style x:Key="SettingsSectionTitle" TargetType="TextBlock">
+      <Setter Property="FontSize" Value="15" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="{DynamicResource BrushText}" />
+      <Setter Property="Margin" Value="0,0,0,4" />
+    </Style>
+    <Style x:Key="SettingsHint" TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+      <Setter Property="Margin" Value="0,0,0,12" />
+    </Style>
+    <Style x:Key="SettingsRow" TargetType="Border">
+      <Setter Property="Padding" Value="0,10" />
+      <Setter Property="BorderBrush" Value="{DynamicResource BrushBorderSubtle}" />
+      <Setter Property="BorderThickness" Value="0,0,0,1" />
+      <Setter Property="Margin" Value="0,0,0,2" />
+    </Style>
+    <Style x:Key="SettingsGroupLabel" TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="{DynamicResource BrushAccent}" />
+      <Setter Property="Margin" Value="0,12,0,6" />
+    </Style>
+  </UserControl.Resources>
+
+  <Grid Margin="0,0,0,8">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+
+    <Border Grid.Row="0" Style="{StaticResource PageHeaderBar}">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" MinWidth="200" />
+        </Grid.ColumnDefinitions>
+        <StackPanel Margin="0,0,12,0">
+          <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Page.Settings]}" Style="{StaticResource PageTitle}" />
+          <TextBlock Text="{Binding CompactSummary}" Style="{StaticResource MutedText}" Margin="0,4,0,0" FontSize="12" />
+          <TextBlock Text="{Binding Status}" Style="{StaticResource MutedText}" Margin="0,2,0,0" FontSize="11" TextWrapping="Wrap" />
+        </StackPanel>
+        <TextBox Grid.Column="1" Width="260" MinWidth="200" MinHeight="36"
+                 HorizontalAlignment="Right"
+                 Style="{StaticResource SearchTextBox}"
+                 Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                 VerticalAlignment="Center"
+                 Tag="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.SearchPlaceholder]}"
+                 ToolTip="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.SearchPlaceholder]}" />
+      </Grid>
+    </Border>
+
+    <!-- Nav superior (estrecho / wrap) -->
+    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="0,8,0,0">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="180" MinWidth="140" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Categorías izquierda -->
+        <StackPanel Grid.Column="0" Margin="0,0,12,0">
+          <ItemsControl ItemsSource="{Binding Categories}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Button Content="{Binding Title}"
+                        Command="{Binding DataContext.SelectCategoryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        CommandParameter="{Binding Id}"
+                        Style="{StaticResource SettingsNavButton}"
+                        Visibility="{Binding IsVisible, Converter={StaticResource BoolVis}}" />
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+
+        <!-- Contenido -->
+        <StackPanel Grid.Column="1">
+
+          <!-- APARIENCIA + IDIOMA -->
+          <StackPanel Visibility="{Binding IsAppearance, Converter={StaticResource BoolVis}}">
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.Cat.Appearance]}" Style="{StaticResource SettingsSectionTitle}" />
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.Theme]}" Style="{StaticResource SettingsGroupLabel}" Margin="0,0,0,6" />
+            <UniformGrid Columns="3" Margin="0,0,0,10" HorizontalAlignment="Left" Width="330">
+              <Button Command="{Binding SetThemeCommand}" CommandParameter="Auto" Style="{StaticResource SortChipButton}"
+                      MinHeight="34" Height="34" Margin="0,0,6,0" Padding="8,6" HorizontalAlignment="Stretch"
+                      FocusVisualStyle="{x:Null}">
+                <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.ThemeAuto]}" FontSize="12.5" FontWeight="SemiBold"
+                           VerticalAlignment="Center" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" />
+              </Button>
+              <Button Command="{Binding SetThemeCommand}" CommandParameter="Dark" Style="{StaticResource SortChipButton}"
+                      MinHeight="34" Height="34" Margin="0,0,6,0" Padding="8,6" HorizontalAlignment="Stretch"
+                      FocusVisualStyle="{x:Null}">
+                <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.ThemeDark]}" FontSize="12.5" FontWeight="SemiBold"
+                           VerticalAlignment="Center" HorizontalAlignment="Center" />
+              </Button>
+              <Button Command="{Binding SetThemeCommand}" CommandParameter="Light" Style="{StaticResource SortChipButton}"
+                      MinHeight="34" Height="34" Margin="0" Padding="8,6" HorizontalAlignment="Stretch"
+                      FocusVisualStyle="{x:Null}">
+                <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.ThemeLight]}" FontSize="12.5" FontWeight="SemiBold"
+                           VerticalAlignment="Center" HorizontalAlignment="Center" />
+              </Button>
+            </UniformGrid>
+            <Border Height="56" CornerRadius="10" BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1"
+                    Background="{DynamicResource BrushSurfaceSoft}" Margin="0,0,0,16" MaxWidth="220" HorizontalAlignment="Left">
+              <Grid Margin="12">
+                <Border Width="28" Height="36" CornerRadius="6" Background="{DynamicResource BrushAccent}" HorizontalAlignment="Left" />
+                <StackPanel Margin="40,6,0,0">
+                  <Border Height="6" Width="80" CornerRadius="2" Background="{DynamicResource BrushText}" Opacity="0.7" HorizontalAlignment="Left" />
+                  <Border Height="4" Width="54" CornerRadius="2" Background="{DynamicResource BrushMuted}" Margin="0,8,0,0" HorizontalAlignment="Left" />
+                </StackPanel>
+              </Grid>
+            </Border>
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.Language]}" Style="{StaticResource SettingsGroupLabel}" />
+            <UniformGrid Columns="2" Margin="0,0,0,8" HorizontalAlignment="Left" Width="220">
+              <Button Content="Español" Command="{Binding SetLanguageCommand}" CommandParameter="es"
+                      Style="{StaticResource SortChipButton}" Margin="0,0,6,0"
+                      MinWidth="100" MinHeight="34" HorizontalAlignment="Stretch" />
+              <Button Content="English" Command="{Binding SetLanguageCommand}" CommandParameter="en"
+                      Style="{StaticResource SortChipButton}" Margin="0"
+                      MinWidth="100" MinHeight="34" HorizontalAlignment="Stretch" />
+            </UniformGrid>
+            <TextBlock Text="{Binding LanguageNote}" Style="{StaticResource SettingsHint}" />
+          </StackPanel>
+
+          <!-- RECOMENDACIONES -->
+          <StackPanel Visibility="{Binding IsRecommendations, Converter={StaticResource BoolVis}}">
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.Cat.Recommendations]}" Style="{StaticResource SettingsSectionTitle}" />
+            <Border Style="{StaticResource SettingsRow}">
+              <DockPanel>
+                <CheckBox DockPanel.Dock="Right" IsChecked="{Binding Profile.ShowAdvancedRecommendations, Mode=TwoWay}" VerticalAlignment="Center" />
+                <StackPanel Margin="0,0,12,0">
+                  <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.Rec.Advanced]}" Foreground="{DynamicResource BrushText}" FontWeight="SemiBold" />
+                  <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.Rec.AdvancedHint]}" Style="{StaticResource MutedText}" FontSize="11" TextWrapping="Wrap" Margin="0,2,0,0" />
+                </StackPanel>
+              </DockPanel>
+            </Border>
+            <Border Style="{StaticResource SettingsRow}">
+              <DockPanel>
+                <CheckBox DockPanel.Dock="Right" IsChecked="{Binding Profile.ShowSafeRecommendationsOnly, Mode=TwoWay}" VerticalAlignment="Center" />
+                <StackPanel Margin="0,0,12,0">
+                  <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.Rec.SafeOnly]}" Foreground="{DynamicResource BrushText}" FontWeight="SemiBold" />
+                  <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.Rec.SafeHint]}" Style="{StaticResource MutedText}" FontSize="11" TextWrapping="Wrap" Margin="0,2,0,0" />
+                </StackPanel>
+              </DockPanel>
+            </Border>
+            <Border Style="{StaticResource SettingsRow}">
+              <DockPanel>
+                <CheckBox DockPanel.Dock="Right" IsChecked="{Binding Profile.ShowExperimentalActions, Mode=TwoWay}" VerticalAlignment="Center" />
+                <StackPanel Margin="0,0,12,0">
+                  <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.Rec.Experimental]}" Foreground="{DynamicResource BrushText}" FontWeight="SemiBold" />
+                  <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.Rec.ExperimentalHint]}" Style="{StaticResource MutedText}" FontSize="11" TextWrapping="Wrap" Margin="0,2,0,0" />
+                </StackPanel>
+              </DockPanel>
+            </Border>
+            <Border Style="{StaticResource SettingsRow}" BorderThickness="0">
+              <DockPanel>
+                <CheckBox DockPanel.Dock="Right" IsChecked="{Binding Profile.ShowTechnicalExplanations, Mode=TwoWay}" VerticalAlignment="Center" />
+                <StackPanel Margin="0,0,12,0">
+                  <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.Rec.Technical]}" Foreground="{DynamicResource BrushText}" FontWeight="SemiBold" />
+                </StackPanel>
+              </DockPanel>
+            </Border>
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.Rec.Detail]}" Style="{StaticResource SettingsGroupLabel}" />
+            <ItemsControl ItemsSource="{Binding DetailLevels}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Button Content="{Binding}"
+                          Command="{Binding DataContext.SetDetailLevelCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                          CommandParameter="{Binding}" Style="{StaticResource SortChipButton}" Margin="0,0,8,0" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+
+          <!-- ANÁLISIS -->
+          <StackPanel Visibility="{Binding IsAnalysis, Converter={StaticResource BoolVis}}">
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.Cat.Analysis]}" Style="{StaticResource SettingsSectionTitle}" />
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.Analysis.GroupAuto]}" Style="{StaticResource SettingsGroupLabel}" />
+            <Border Style="{StaticResource SettingsRow}">
+              <DockPanel>
+                <CheckBox DockPanel.Dock="Right" IsChecked="{Binding Profile.AutoRefreshOnLaunch, Mode=TwoWay}" />
+                <StackPanel Margin="0,0,12,0">
+                  <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.Analysis.AutoRefresh]}" Foreground="{DynamicResource BrushText}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                </StackPanel>
+              </DockPanel>
+            </Border>
+            <Border Style="{StaticResource SettingsRow}">
+              <DockPanel>
+                <CheckBox DockPanel.Dock="Right" IsChecked="{Binding Profile.PreferCachedAnalysis, Mode=TwoWay}" />
+                <StackPanel Margin="0,0,12,0">
+                  <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.Analysis.PreferCache]}" Foreground="{DynamicResource BrushText}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                </StackPanel>
+              </DockPanel>
+            </Border>
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.Analysis.GroupHistory]}" Style="{StaticResource SettingsGroupLabel}" />
+            <Border Style="{StaticResource SettingsRow}" BorderThickness="0">
+              <DockPanel>
+                <CheckBox DockPanel.Dock="Right" IsChecked="{Binding Profile.SaveAnalysisHistory, Mode=TwoWay}" />
+                <StackPanel Margin="0,0,12,0">
+                  <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.Analysis.SaveHistory]}" Foreground="{DynamicResource BrushText}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                </StackPanel>
+              </DockPanel>
+            </Border>
+          </StackPanel>
+
+          <!-- OPTIMIZACIÓN -->
+          <StackPanel Visibility="{Binding IsOptimization, Converter={StaticResource BoolVis}}">
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.Cat.Optimization]}" Style="{StaticResource SettingsSectionTitle}" />
+            <Border Style="{StaticResource SettingsRow}">
+              <DockPanel>
+                <CheckBox DockPanel.Dock="Right" IsChecked="{Binding Profile.AutoRestorePointWhenNeeded, Mode=TwoWay}" />
+                <StackPanel Margin="0,0,12,0">
+                  <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.Opt.RestorePoint]}" Foreground="{DynamicResource BrushText}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                  <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.Opt.RestoreHint]}" Style="{StaticResource MutedText}" FontSize="11" TextWrapping="Wrap" Margin="0,2,0,0" />
+                </StackPanel>
+              </DockPanel>
+            </Border>
+            <Border Style="{StaticResource SettingsRow}">
+              <DockPanel>
+                <CheckBox DockPanel.Dock="Right" IsChecked="{Binding Profile.ConfirmBeforeApply, Mode=TwoWay}" />
+                <StackPanel Margin="0,0,12,0">
+                  <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.Opt.Confirm]}" Foreground="{DynamicResource BrushText}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                </StackPanel>
+              </DockPanel>
+            </Border>
+            <Border Style="{StaticResource SettingsRow}">
+              <DockPanel>
+                <CheckBox DockPanel.Dock="Right" IsChecked="{Binding Profile.ShowAdvancedWarnings, Mode=TwoWay}" />
+                <StackPanel Margin="0,0,12,0">
+                  <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.Opt.Warnings]}" Foreground="{DynamicResource BrushText}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                  <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.AdvancedBadge]}" Foreground="{DynamicResource BrushWarn}" FontSize="10" Margin="0,2,0,0" />
+                </StackPanel>
+              </DockPanel>
+            </Border>
+            <Border Style="{StaticResource SettingsRow}">
+              <DockPanel>
+                <CheckBox DockPanel.Dock="Right" IsChecked="{Binding Profile.ShowIncompatibleActions, Mode=TwoWay}" />
+                <StackPanel Margin="0,0,12,0">
+                  <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.Opt.Incompatible]}" Foreground="{DynamicResource BrushText}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                </StackPanel>
+              </DockPanel>
+            </Border>
+            <Border Style="{StaticResource SettingsRow}" BorderThickness="0">
+              <DockPanel>
+                <CheckBox DockPanel.Dock="Right" IsChecked="{Binding Profile.ShowFinishSummary, Mode=TwoWay}" />
+                <StackPanel Margin="0,0,12,0">
+                  <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.Opt.Summary]}" Foreground="{DynamicResource BrushText}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                </StackPanel>
+              </DockPanel>
+            </Border>
+          </StackPanel>
+
+          <!-- NOTIFICACIONES -->
+          <StackPanel Visibility="{Binding IsNotifications, Converter={StaticResource BoolVis}}">
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.Cat.Notifications]}" Style="{StaticResource SettingsSectionTitle}" />
+            <Border Style="{StaticResource SettingsRow}">
+              <DockPanel>
+                <CheckBox DockPanel.Dock="Right" IsChecked="{Binding Profile.NotifyOnOptimizeDone, Mode=TwoWay}" />
+                <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.Notify.Done]}" Foreground="{DynamicResource BrushText}" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,12,0" />
+              </DockPanel>
+            </Border>
+            <Border Style="{StaticResource SettingsRow}">
+              <DockPanel>
+                <CheckBox DockPanel.Dock="Right" IsChecked="{Binding Profile.NotifyRestartPending, Mode=TwoWay}" />
+                <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.Notify.Restart]}" Foreground="{DynamicResource BrushText}" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,12,0" />
+              </DockPanel>
+            </Border>
+            <Border Style="{StaticResource SettingsRow}" BorderThickness="0">
+              <DockPanel>
+                <CheckBox DockPanel.Dock="Right" IsChecked="{Binding Profile.NotifyNewRecommendations, Mode=TwoWay}" />
+                <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.Notify.Recs]}" Foreground="{DynamicResource BrushText}" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,12,0" />
+              </DockPanel>
+            </Border>
+          </StackPanel>
+
+          <!-- AVANZADO -->
+          <StackPanel Visibility="{Binding IsAdvanced, Converter={StaticResource BoolVis}}">
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.Cat.Advanced]}" Style="{StaticResource SettingsSectionTitle}" />
+            <Border Style="{StaticResource SettingsRow}" BorderThickness="0" Margin="0,0,0,16">
+              <DockPanel>
+                <CheckBox DockPanel.Dock="Right" IsChecked="{Binding Profile.DeveloperMode, Mode=TwoWay}" />
+                <StackPanel Margin="0,0,12,0">
+                  <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.Adv.Developer]}" Foreground="{DynamicResource BrushText}" FontWeight="SemiBold" />
+                  <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.AdvancedBadge]}" Foreground="{DynamicResource BrushWarn}" FontSize="10" Margin="0,2,0,0" />
+                </StackPanel>
+              </DockPanel>
+            </Border>
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.ConfigManagement]}" Style="{StaticResource SettingsGroupLabel}" />
+            <WrapPanel Margin="0,0,0,16">
+              <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.Export]}" Command="{Binding ExportConfigCommand}" Style="{StaticResource SecondaryButton}" Margin="0,0,8,8" />
+              <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.Import]}" Command="{Binding ImportConfigCommand}" Style="{StaticResource SecondaryButton}" Margin="0,0,8,8" />
+            </WrapPanel>
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.ResetZone]}" Style="{StaticResource SettingsGroupLabel}" />
+            <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.Reset]}" Command="{Binding ResetConfigCommand}"
+                    Style="{StaticResource DangerButton}" HorizontalAlignment="Left" Margin="0,0,0,8" />
+          </StackPanel>
+
+          <!-- ACERCA DE -->
+          <StackPanel Visibility="{Binding IsAbout, Converter={StaticResource BoolVis}}">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+              </Grid.ColumnDefinitions>
+              <Border Width="88" Height="88" CornerRadius="16" Margin="0,0,16,0"
+                      Background="{DynamicResource BrushSurfaceSoft}" BorderBrush="{DynamicResource BrushBorderSubtle}" BorderThickness="1">
+                <Image Source="pack://application:,,,/Assets/Brand/AetherPC-transparent.png" Width="56" Height="56"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                       RenderOptions.BitmapScalingMode="HighQuality" />
+              </Border>
+              <StackPanel Grid.Column="1">
+                <TextBlock Text="AetherPC" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource BrushAccent}" />
+                <TextBlock Style="{StaticResource MutedText}" Margin="0,4,0,0" Text="{Binding AboutVersion, StringFormat=Version {0}}" />
+                <TextBlock Style="{StaticResource MutedText}" Text="{Binding AboutBuild, StringFormat=Build {0}}" />
+                <TextBlock Style="{StaticResource MutedText}" Text="{Binding AboutArch}" />
+              </StackPanel>
+            </Grid>
+            <Border Height="1" Background="{DynamicResource BrushBorderSubtle}" Margin="0,16,0,12" />
+            <TextBlock Style="{StaticResource MutedText}" Text="{Binding AboutOs}" Foreground="{DynamicResource BrushSecondaryText}" />
+            <TextBlock Style="{StaticResource MutedText}" Margin="0,4,0,0" Text="{Binding AboutPath}" TextWrapping="Wrap" FontSize="11" />
+            <WrapPanel Margin="0,14,0,0">
+              <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.Copy]}" Command="{Binding CopyAboutCommand}" Style="{StaticResource TertiaryButton}" Margin="0,0,8,8" />
+              <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.OpenFolder]}" Command="{Binding OpenInstallFolderCommand}" Style="{StaticResource SecondaryBlueButton}" Margin="0,0,8,8" />
+            </WrapPanel>
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.About.License]}" Style="{StaticResource MutedText}" Margin="0,8,0,0" TextWrapping="Wrap" />
+          </StackPanel>
+
+          <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Settings.DisclaimerShort]}"
+                     Style="{StaticResource MutedText}" Margin="0,24,0,0" TextWrapping="Wrap" FontSize="11" />
+        </StackPanel>
+      </Grid>
+    </ScrollViewer>
+  </Grid>
+</UserControl>

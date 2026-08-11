@@ -1,0 +1,64 @@
+name: Bug report
+description: Report something that does not work as expected
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve AetherPC. **Do not** include passwords, tokens, personal documents, or full system dumps.
+  - type: input
+    id: version
+    attributes:
+      label: AetherPC version
+      description: e.g. 1.0.0 (Installer / Portable)
+      placeholder: 1.0.0
+    validations:
+      required: true
+  - type: dropdown
+    id: windows
+    attributes:
+      label: Windows
+      options:
+        - Windows 11
+        - Windows 10
+        - Other / not sure
+    validations:
+      required: true
+  - type: input
+    id: hardware
+    attributes:
+      label: Relevant hardware (optional)
+      description: CPU/GPU/disk if related to the bug
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs (optional)
+      description: Paste only relevant lines. Redact personal paths and secrets.
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots (optional)
+      description: Drag images here if useful. Avoid personal data on screen.

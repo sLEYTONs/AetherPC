@@ -1,0 +1,456 @@
+<UserControl x:Class="AetherPC.App.Views.HardwareView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:s="clr-namespace:AetherPC.App.Services"
+             xmlns:conv="clr-namespace:AetherPC.App.Converters"
+             Loaded="HardwareView_OnLoaded">
+  <UserControl.Resources>
+    <BooleanToVisibilityConverter x:Key="BoolVis" />
+    <conv:InverseBoolConverter x:Key="InvertBusy" />
+    <conv:NullToVisibilityConverter x:Key="NullToVis" />
+
+    <Style x:Key="HwLabel" TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="Margin" Value="0,0,0,2" />
+    </Style>
+    <Style x:Key="HwValue" TargetType="TextBlock">
+      <Setter Property="Foreground" Value="{DynamicResource BrushText}" />
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style x:Key="HwMeta" TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+      <Setter Property="Margin" Value="0,2,0,0" />
+    </Style>
+    <Style x:Key="HwStripItem" TargetType="Border">
+      <Setter Property="Background" Value="{DynamicResource BrushSurfaceSoft}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource BrushBorderSubtle}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="10,8" />
+      <Setter Property="Margin" Value="0,0,8,0" />
+      <Setter Property="MinWidth" Value="110" />
+    </Style>
+    <Style x:Key="HwFactRow" TargetType="DockPanel">
+      <Setter Property="Margin" Value="0,0,0,8" />
+      <Setter Property="LastChildFill" Value="True" />
+    </Style>
+  </UserControl.Resources>
+
+  <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Margin="0,0,0,16">
+
+      <Border Style="{StaticResource PageHeaderBar}">
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <StackPanel>
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Page.Hardware]}" Style="{StaticResource PageTitle}" />
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.Blurb]}" Style="{StaticResource PageBlurb}" />
+            <TextBlock Text="{Binding Status}" Style="{StaticResource MutedText}" Margin="0,4,0,0" TextWrapping="Wrap" />
+            <TextBlock Text="{Binding AgeText}" Foreground="{DynamicResource BrushAccent}" FontSize="11" Margin="0,3,0,0" />
+          </StackPanel>
+          <WrapPanel Grid.Column="1" Style="{StaticResource ButtonRowPanel}" VerticalAlignment="Top" HorizontalAlignment="Right">
+            <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.CopySummary]}"
+                    Command="{Binding CopySummaryCommand}" Style="{StaticResource TertiaryButton}" Margin="0,0,6,6"
+                    IsEnabled="{Binding HasData}" />
+            <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Common.Refresh]}"
+                    Command="{Binding LoadCommand}" Style="{StaticResource HeaderActionButton}" Margin="0,0,0,6"
+                    IsEnabled="{Binding IsBusy, Converter={StaticResource InvertBusy}, FallbackValue=True}" />
+          </WrapPanel>
+        </Grid>
+      </Border>
+
+      <ProgressBar Height="3" Maximum="100" Value="{Binding Progress}" Margin="0,0,0,8"
+                   Visibility="{Binding IsBusy, Converter={StaticResource BoolVis}}" />
+
+      <!-- Estado vacío -->
+      <Border Style="{StaticResource GlassCardLite}" Margin="0,8,0,0"
+              Visibility="{Binding HasData, Converter={StaticResource InvertBusy}}">
+        <StackPanel HorizontalAlignment="Center" Margin="12">
+          <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.ReadyHint]}"
+                     Style="{StaticResource MutedText}" TextWrapping="Wrap" TextAlignment="Center" />
+          <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Common.Refresh]}"
+                  Command="{Binding LoadCommand}" Style="{StaticResource PrimaryButton}"
+                  HorizontalAlignment="Center" Margin="0,12,0,0"
+                  IsEnabled="{Binding IsBusy, Converter={StaticResource InvertBusy}, FallbackValue=True}" />
+        </StackPanel>
+      </Border>
+
+      <!-- Contenido con datos: DataContext SIEMPRE = HardwareViewModel (nunca Snapshot) -->
+      <StackPanel Visibility="{Binding HasData, Converter={StaticResource BoolVis}}">
+
+        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="0,0,0,10">
+          <StackPanel Orientation="Horizontal">
+            <Border Style="{StaticResource HwStripItem}">
+              <StackPanel>
+                <TextBlock Text="CPU" Style="{StaticResource HwLabel}" />
+                <TextBlock Text="{Binding SummaryCpu}" Style="{StaticResource HwValue}" FontSize="13" />
+              </StackPanel>
+            </Border>
+            <Border Style="{StaticResource HwStripItem}">
+              <StackPanel>
+                <TextBlock Text="GPU" Style="{StaticResource HwLabel}" />
+                <TextBlock Text="{Binding SummaryGpu}" Style="{StaticResource HwValue}" FontSize="13" />
+              </StackPanel>
+            </Border>
+            <Border Style="{StaticResource HwStripItem}">
+              <StackPanel>
+                <TextBlock Text="RAM" Style="{StaticResource HwLabel}" />
+                <TextBlock Text="{Binding SummaryRam}" Style="{StaticResource HwValue}" FontSize="13" />
+              </StackPanel>
+            </Border>
+            <Border Style="{StaticResource HwStripItem}">
+              <StackPanel>
+                <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.Storage]}" Style="{StaticResource HwLabel}" />
+                <TextBlock Text="{Binding SummaryStorage}" Style="{StaticResource HwValue}" FontSize="13" />
+              </StackPanel>
+            </Border>
+            <Border Style="{StaticResource HwStripItem}" Margin="0">
+              <StackPanel>
+                <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.BoardShort]}" Style="{StaticResource HwLabel}" />
+                <TextBlock Text="{Binding SummaryBoard}" Style="{StaticResource HwValue}" FontSize="13" />
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </ScrollViewer>
+
+        <WrapPanel Style="{StaticResource ButtonRowPanel}" Margin="4,0,0,12">
+          <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.Tab.Summary]}" Command="{Binding SelectSectionCommand}" CommandParameter="summary" Style="{StaticResource SortChipButton}" />
+          <Button Content="CPU" Command="{Binding SelectSectionCommand}" CommandParameter="cpu" Style="{StaticResource SortChipButton}" />
+          <Button Content="GPU" Command="{Binding SelectSectionCommand}" CommandParameter="gpu" Style="{StaticResource SortChipButton}" />
+          <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.Tab.Memory]}" Command="{Binding SelectSectionCommand}" CommandParameter="memory" Style="{StaticResource SortChipButton}" />
+          <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.Tab.Storage]}" Command="{Binding SelectSectionCommand}" CommandParameter="storage" Style="{StaticResource SortChipButton}" />
+          <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.Tab.Board]}" Command="{Binding SelectSectionCommand}" CommandParameter="board" Style="{StaticResource SortChipButton}" />
+          <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.Tab.Displays]}" Command="{Binding SelectSectionCommand}" CommandParameter="displays" Style="{StaticResource SortChipButton}" />
+          <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.Tab.Network]}" Command="{Binding SelectSectionCommand}" CommandParameter="network" Style="{StaticResource SortChipButton}" />
+        </WrapPanel>
+
+        <!-- ===== RESUMEN ===== -->
+        <UniformGrid Columns="2" Visibility="{Binding IsSummary, Converter={StaticResource BoolVis}}">
+          <Border Style="{StaticResource GlassCardLite}" Margin="0,0,6,8">
+            <StackPanel>
+              <TextBlock Text="CPU" Style="{StaticResource HwLabel}" Foreground="{DynamicResource BrushAccent}" />
+              <TextBlock Text="{Binding Snapshot.Cpu.Name}" Style="{StaticResource HwValue}" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Cpu.Cores, StringFormat={}{0} cores}" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Cpu.LogicalProcessors, StringFormat={}{0} threads}" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Cpu.UsagePercent, StringFormat={}{0:0}%}" />
+              <ProgressBar Height="4" Maximum="100" Value="{Binding Snapshot.Cpu.UsagePercent, Mode=OneWay}" Margin="0,8,0,0" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Cpu.TemperatureCelsius, StringFormat={}{0:0} °C}" />
+            </StackPanel>
+          </Border>
+          <Border Style="{StaticResource GlassCardLite}" Margin="6,0,0,8">
+            <StackPanel>
+              <TextBlock Text="GPU" Style="{StaticResource HwLabel}" Foreground="{DynamicResource BrushAccent}" />
+              <TextBlock Text="{Binding Snapshot.Gpu.Name}" Style="{StaticResource HwValue}" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Gpu.DriverVersion, StringFormat=Driver {0}}" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Gpu.AdapterRamBytes, Converter={x:Static conv:ByteSizeConverter.Instance}}" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Thermals.GpuCelsius, StringFormat={}{0:0} °C}" />
+            </StackPanel>
+          </Border>
+          <Border Style="{StaticResource GlassCardLite}" Margin="0,0,6,8">
+            <StackPanel>
+              <TextBlock Text="RAM" Style="{StaticResource HwLabel}" Foreground="{DynamicResource BrushAccent}" />
+              <TextBlock Style="{StaticResource HwValue}" Text="{Binding Snapshot.Memory.TotalBytes, Converter={x:Static conv:ByteSizeConverter.Instance}}" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Memory.MemoryType}" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Memory.SpeedMhz, StringFormat={}{0:0} MHz}" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Memory.UsagePercent, StringFormat={}{0:0}%}" />
+              <ProgressBar Height="4" Maximum="100" Value="{Binding Snapshot.Memory.UsagePercent, Mode=OneWay}" Margin="0,8,0,0" Foreground="{DynamicResource BrushOk}" />
+            </StackPanel>
+          </Border>
+          <Border Style="{StaticResource GlassCardLite}" Margin="6,0,0,8">
+            <StackPanel>
+              <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.Storage]}" Style="{StaticResource HwLabel}" Foreground="{DynamicResource BrushAccent}" />
+              <ItemsControl ItemsSource="{Binding Snapshot.Disks}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <DockPanel Margin="0,0,0,4">
+                      <TextBlock DockPanel.Dock="Left" FontWeight="SemiBold" Foreground="{DynamicResource BrushText}"
+                                 Text="{Binding DriveLetter}" Width="36" />
+                      <TextBlock Foreground="{DynamicResource BrushSecondaryText}" FontSize="12"
+                                 Text="{Binding UsedPercent, StringFormat={}{0:0}% · }" />
+                      <TextBlock Foreground="{DynamicResource BrushSecondaryText}" FontSize="12"
+                                 Text="{Binding MediaType}" />
+                    </DockPanel>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </Border>
+          <Border Style="{StaticResource GlassCardLite}" Margin="0,0,0,8">
+            <StackPanel>
+              <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.System]}" Style="{StaticResource HwLabel}" Foreground="{DynamicResource BrushAccent}" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Motherboard.Manufacturer}" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Motherboard.Product}" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Bios.Version, StringFormat=BIOS {0}}" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Monitors.Count, StringFormat={}{0} displays}" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Network.IPv4, StringFormat=IP {0}}" />
+            </StackPanel>
+          </Border>
+        </UniformGrid>
+
+        <!-- ===== CPU ===== -->
+        <Border Style="{StaticResource GlassCardLite}" Visibility="{Binding IsCpu, Converter={StaticResource BoolVis}}">
+          <StackPanel>
+            <DockPanel Margin="0,0,0,12">
+              <Button DockPanel.Dock="Right" Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.Copy]}"
+                      Command="{Binding CopySectionCommand}" Style="{StaticResource TertiaryButton}" />
+              <TextBlock Text="CPU" Style="{StaticResource HwValue}" FontSize="16" VerticalAlignment="Center" />
+            </DockPanel>
+            <TextBlock Text="{Binding Snapshot.Cpu.Name}" Style="{StaticResource HwValue}" Margin="0,0,0,10" />
+            <DockPanel Style="{StaticResource HwFactRow}">
+              <TextBlock DockPanel.Dock="Left" Width="150" Style="{StaticResource HwLabel}" Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.Manufacturer]}" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Cpu.Manufacturer}" />
+            </DockPanel>
+            <DockPanel Style="{StaticResource HwFactRow}">
+              <TextBlock DockPanel.Dock="Left" Width="150" Style="{StaticResource HwLabel}" Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.Architecture]}" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Cpu.Architecture}" />
+            </DockPanel>
+            <DockPanel Style="{StaticResource HwFactRow}">
+              <TextBlock DockPanel.Dock="Left" Width="150" Style="{StaticResource HwLabel}" Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.Cores]}" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Cpu.Cores}" />
+            </DockPanel>
+            <DockPanel Style="{StaticResource HwFactRow}">
+              <TextBlock DockPanel.Dock="Left" Width="150" Style="{StaticResource HwLabel}" Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.Threads]}" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Cpu.LogicalProcessors}" />
+            </DockPanel>
+            <DockPanel Style="{StaticResource HwFactRow}">
+              <TextBlock DockPanel.Dock="Left" Width="150" Style="{StaticResource HwLabel}" Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.BaseClock]}" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Cpu.MaxClockMhz, StringFormat={}{0:0} MHz}" />
+            </DockPanel>
+            <DockPanel Style="{StaticResource HwFactRow}">
+              <TextBlock DockPanel.Dock="Left" Width="150" Style="{StaticResource HwLabel}" Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.CurrentClock]}" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Cpu.CurrentClockMhz, StringFormat={}{0:0} MHz}" />
+            </DockPanel>
+            <DockPanel Style="{StaticResource HwFactRow}">
+              <TextBlock DockPanel.Dock="Left" Width="150" Style="{StaticResource HwLabel}" Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.Usage]}" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Cpu.UsagePercent, StringFormat={}{0:0}%}" />
+            </DockPanel>
+            <DockPanel Style="{StaticResource HwFactRow}">
+              <TextBlock DockPanel.Dock="Left" Width="150" Style="{StaticResource HwLabel}" Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.Temperature]}" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Cpu.TemperatureCelsius, StringFormat={}{0:0} °C}" />
+            </DockPanel>
+            <ProgressBar Height="5" Maximum="100" Value="{Binding Snapshot.Cpu.UsagePercent, Mode=OneWay}" Margin="0,4,0,8" />
+          </StackPanel>
+        </Border>
+
+        <!-- ===== GPU ===== -->
+        <StackPanel Visibility="{Binding IsGpu, Converter={StaticResource BoolVis}}">
+          <ItemsControl ItemsSource="{Binding Snapshot.Gpus}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Border Style="{StaticResource GlassCardLite}" Margin="0,0,0,8">
+                  <StackPanel>
+                    <DockPanel Margin="0,0,0,8">
+                      <Border DockPanel.Dock="Right" Background="{DynamicResource BrushChip}" CornerRadius="6" Padding="8,3" Margin="8,0,0,0"
+                              Visibility="{Binding IsLikelyIntegrated, Converter={StaticResource BoolVis}}">
+                        <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.Integrated]}" FontSize="11" Foreground="{DynamicResource BrushAccent}" />
+                      </Border>
+                      <TextBlock Text="{Binding Name}" Style="{StaticResource HwValue}" />
+                    </DockPanel>
+                    <TextBlock Style="{StaticResource HwMeta}" Text="{Binding DriverVersion, StringFormat=Driver {0}}" />
+                    <TextBlock Style="{StaticResource HwMeta}" Text="{Binding AdapterRamBytes, Converter={x:Static conv:ByteSizeConverter.Instance}}" />
+                    <TextBlock Style="{StaticResource HwMeta}" Text="{Binding TemperatureCelsius, StringFormat={}{0:0} °C}" />
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+
+        <!-- ===== MEMORIA ===== -->
+        <StackPanel Visibility="{Binding IsMemory, Converter={StaticResource BoolVis}}">
+          <Border Style="{StaticResource GlassCardLite}" Margin="0,0,0,8">
+            <StackPanel>
+              <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.PhysicalMemory]}" Style="{StaticResource HwValue}" FontSize="15" Margin="0,0,0,10" />
+              <TextBlock Style="{StaticResource HwValue}" Text="{Binding Snapshot.Memory.TotalBytes, Converter={x:Static conv:ByteSizeConverter.Instance}}" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Memory.MemoryType}" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Memory.SpeedMhz, StringFormat={}{0:0} MHz}" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Memory.SlotCount, StringFormat={}{0} modules}" />
+            </StackPanel>
+          </Border>
+          <ItemsControl ItemsSource="{Binding Snapshot.Memory.Modules}" Margin="0,0,0,8">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Border Background="{DynamicResource BrushSurfaceSoft}" CornerRadius="8" Padding="12,10" Margin="0,0,0,6"
+                        BorderBrush="{DynamicResource BrushBorderSubtle}" BorderThickness="1">
+                  <StackPanel>
+                    <TextBlock Foreground="{DynamicResource BrushAccent}" FontWeight="SemiBold" FontSize="12"
+                               Text="{Binding DeviceLocator}" />
+                    <TextBlock Style="{StaticResource HwValue}" FontSize="13" Margin="0,4,0,0"
+                               Text="{Binding CapacityBytes, Converter={x:Static conv:ByteSizeConverter.Instance}}" />
+                    <TextBlock Style="{StaticResource HwMeta}" Text="{Binding MemoryType}" />
+                    <TextBlock Style="{StaticResource HwMeta}" Text="{Binding SpeedMhz, StringFormat={}{0:0} MHz}" />
+                    <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Manufacturer}" />
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <Border Style="{StaticResource GlassCardLite}">
+            <StackPanel>
+              <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.MemoryState]}" Style="{StaticResource HwValue}" FontSize="15" Margin="0,0,0,10" />
+              <DockPanel Style="{StaticResource HwFactRow}">
+                <TextBlock DockPanel.Dock="Left" Width="150" Style="{StaticResource HwLabel}" Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.Used]}" />
+                <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Memory.UsedBytes, Converter={x:Static conv:ByteSizeConverter.Instance}}" />
+              </DockPanel>
+              <DockPanel Style="{StaticResource HwFactRow}">
+                <TextBlock DockPanel.Dock="Left" Width="150" Style="{StaticResource HwLabel}" Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.Available]}" />
+                <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Memory.AvailableBytes, Converter={x:Static conv:ByteSizeConverter.Instance}}" />
+              </DockPanel>
+              <ProgressBar Height="5" Maximum="100" Value="{Binding Snapshot.Memory.UsagePercent, Mode=OneWay}" Margin="0,0,0,10" Foreground="{DynamicResource BrushOk}" />
+              <DockPanel Style="{StaticResource HwFactRow}">
+                <TextBlock DockPanel.Dock="Left" Width="150" Style="{StaticResource HwLabel}" Text="Commit" />
+                <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Memory.CommitUsagePercent, StringFormat={}{0:0}%}" />
+              </DockPanel>
+              <DockPanel Style="{StaticResource HwFactRow}">
+                <TextBlock DockPanel.Dock="Left" Width="150" Style="{StaticResource HwLabel}" Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.Compressed]}" />
+                <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Memory.CompressedBytes, Converter={x:Static conv:ByteSizeConverter.Instance}}" />
+              </DockPanel>
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Memory.PageFileConfigDetail}" />
+            </StackPanel>
+          </Border>
+        </StackPanel>
+
+        <!-- ===== STORAGE ===== -->
+        <StackPanel Visibility="{Binding IsStorage, Converter={StaticResource BoolVis}}">
+          <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.Storage]}"
+                     Style="{StaticResource HwValue}" FontSize="15" Margin="0,0,0,8" />
+          <ItemsControl ItemsSource="{Binding Snapshot.Disks}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Border Style="{StaticResource GlassCardLite}" Margin="0,0,0,8">
+                  <Grid>
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="52" />
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Border Width="44" Height="44" CornerRadius="10" Background="{DynamicResource BrushChip}" VerticalAlignment="Top">
+                      <TextBlock Text="{Binding DriveLetter}" FontWeight="Bold" Foreground="{DynamicResource BrushAccent}"
+                                 HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel Grid.Column="1" Margin="12,0,8,0">
+                      <TextBlock Text="{Binding Model, TargetNullValue=—}" Style="{StaticResource HwValue}" FontSize="13" />
+                      <TextBlock Style="{StaticResource HwMeta}" Text="{Binding MediaType}" />
+                      <TextBlock Style="{StaticResource HwMeta}" Text="{Binding BusType}" />
+                      <TextBlock Style="{StaticResource HwMeta}" Text="{Binding FreeBytes, Converter={x:Static conv:ByteSizeConverter.Instance}, StringFormat={}{0} free}" />
+                      <TextBlock Style="{StaticResource HwMeta}" Text="{Binding TotalBytes, Converter={x:Static conv:ByteSizeConverter.Instance}, StringFormat={}{0} total}" />
+                      <ProgressBar Height="4" Maximum="100" Value="{Binding UsedPercent, Mode=OneWay}" Margin="0,8,0,0" />
+                    </StackPanel>
+                    <TextBlock Grid.Column="2" Text="{Binding UsedPercent, StringFormat={}{0:0}%}" FontWeight="SemiBold"
+                               Foreground="{DynamicResource BrushSecondaryText}" VerticalAlignment="Center" />
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+
+        <!-- ===== BOARD ===== -->
+        <UniformGrid Columns="2" Visibility="{Binding IsBoard, Converter={StaticResource BoolVis}}">
+          <Border Style="{StaticResource GlassCardLite}" Margin="0,0,6,0">
+            <StackPanel>
+              <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.Motherboard]}" Style="{StaticResource HwValue}" FontSize="15" Margin="0,0,0,10" />
+              <TextBlock Style="{StaticResource HwLabel}" Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.Manufacturer]}" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Motherboard.Manufacturer}" Margin="0,0,0,8" />
+              <TextBlock Style="{StaticResource HwLabel}" Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.Product]}" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Motherboard.Product}" Margin="0,0,0,8" />
+              <TextBlock Style="{StaticResource HwLabel}" Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.Version]}" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Motherboard.Version}" />
+            </StackPanel>
+          </Border>
+          <Border Style="{StaticResource GlassCardLite}" Margin="6,0,0,0">
+            <StackPanel>
+              <TextBlock Text="BIOS / UEFI" Style="{StaticResource HwValue}" FontSize="15" Margin="0,0,0,10" />
+              <TextBlock Style="{StaticResource HwLabel}" Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.Manufacturer]}" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Bios.Vendor}" Margin="0,0,0,8" />
+              <TextBlock Style="{StaticResource HwLabel}" Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.Version]}" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Bios.Version}" Margin="0,0,0,8" />
+              <TextBlock Style="{StaticResource HwLabel}" Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.Date]}" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Bios.ReleaseDate}" Margin="0,0,0,8" />
+              <TextBlock Style="{StaticResource HwLabel}" Text="SMBIOS" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Bios.SmbiosVersion}" />
+            </StackPanel>
+          </Border>
+        </UniformGrid>
+
+        <!-- ===== DISPLAYS ===== -->
+        <StackPanel Visibility="{Binding IsDisplays, Converter={StaticResource BoolVis}}">
+          <DockPanel Margin="0,0,0,8">
+            <Button DockPanel.Dock="Right" Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.OpenMonitor]}"
+                    Command="{Binding OpenMonitorCommand}" Style="{StaticResource SecondaryButton}" />
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.Monitors]}" Style="{StaticResource HwValue}" FontSize="15" VerticalAlignment="Center" />
+          </DockPanel>
+          <ItemsControl ItemsSource="{Binding VisibleMonitors}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Border Style="{StaticResource GlassCardLite}" Margin="0,0,0,8">
+                  <StackPanel>
+                    <DockPanel>
+                      <Border DockPanel.Dock="Right" Background="{DynamicResource BrushChip}" CornerRadius="6" Padding="8,3"
+                              Visibility="{Binding IsPrimary, Converter={StaticResource BoolVis}}">
+                        <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.Primary]}" FontSize="11" Foreground="{DynamicResource BrushAccent}" />
+                      </Border>
+                      <TextBlock Text="{Binding Name}" Style="{StaticResource HwValue}" />
+                    </DockPanel>
+                    <TextBlock Style="{StaticResource HwMeta}" Margin="0,6,0,0" Text="{Binding ScreenWidth, StringFormat={}{0}×}" />
+                    <TextBlock Style="{StaticResource HwMeta}" Text="{Binding ScreenHeight}" />
+                    <TextBlock Style="{StaticResource HwMeta}" Text="{Binding RefreshHz, StringFormat={}{0:0} Hz}" />
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <Border Style="{StaticResource GlassCardLite}" Margin="0,4,0,0">
+            <StackPanel>
+              <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.Sensors]}" Style="{StaticResource HwValue}" FontSize="14" Margin="0,0,0,8" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Thermals.CpuCelsius, StringFormat=CPU  {0:0} °C}" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Snapshot.Thermals.GpuCelsius, StringFormat=GPU  {0:0} °C}" />
+              <TextBlock Style="{StaticResource HwMeta}" Text="{Binding ThermalNote}" />
+            </StackPanel>
+          </Border>
+        </StackPanel>
+
+        <!-- ===== NETWORK ===== -->
+        <StackPanel Visibility="{Binding IsNetwork, Converter={StaticResource BoolVis}}" Margin="4,0,4,0">
+          <DockPanel Margin="2,0,0,12" LastChildFill="True">
+            <CheckBox DockPanel.Dock="Right"
+                      Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.ShowVirtual]}"
+                      IsChecked="{Binding ShowVirtualAdapters, Mode=TwoWay}"
+                      VerticalAlignment="Center" Margin="12,0,0,0" />
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Hardware.Adapters]}"
+                       Style="{StaticResource HwValue}" FontSize="15" VerticalAlignment="Center"
+                       Margin="0,0,12,0" TextWrapping="NoWrap" />
+          </DockPanel>
+          <TextBlock Style="{StaticResource HwMeta}" Margin="2,0,0,4" Text="{Binding Snapshot.Network.PrimaryAdapter}"
+                     TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
+          <TextBlock Style="{StaticResource HwMeta}" Margin="2,0,0,12" Text="{Binding Snapshot.Network.IPv4, StringFormat=IPv4 {0}}" />
+          <ItemsControl ItemsSource="{Binding VisibleAdapters}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Border Style="{StaticResource GlassCardLite}" Margin="0,0,0,8" Padding="14,12">
+                  <StackPanel>
+                    <TextBlock Text="{Binding Name}" Style="{StaticResource HwValue}" FontSize="13"
+                               TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Style="{StaticResource HwMeta}" Text="{Binding TypeStatus}" TextWrapping="NoWrap" />
+                    <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Speed}"
+                               Visibility="{Binding Speed, Converter={StaticResource NullToVis}}" />
+                    <TextBlock Style="{StaticResource HwMeta}" Text="{Binding IPv4, StringFormat=IPv4 {0}}"
+                               Visibility="{Binding IPv4, Converter={StaticResource NullToVis}}" />
+                    <TextBlock Style="{StaticResource HwMeta}" Text="{Binding Gateway, StringFormat=Gateway {0}}"
+                               Visibility="{Binding Gateway, Converter={StaticResource NullToVis}}" />
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </StackPanel>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

@@ -1,0 +1,146 @@
+<UserControl x:Class="AetherPC.App.Views.ServicesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:s="clr-namespace:AetherPC.App.Services"
+             Loaded="ServicesView_OnLoaded">
+  <UserControl.Resources>
+    <BooleanToVisibilityConverter x:Key="BoolToVis" />
+  </UserControl.Resources>
+
+  <Grid HorizontalAlignment="Stretch">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <Border Grid.Row="0" Style="{StaticResource PageHeaderBar}">
+      <DockPanel LastChildFill="True">
+        <Button DockPanel.Dock="Right" Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Common.Refresh]}" Style="{StaticResource HeaderActionButton}"
+                Margin="12,0,0,0" Click="BtnRefresh_OnClick" />
+        <StackPanel>
+          <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Page.Services]}" Style="{StaticResource PageTitle}" />
+          <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Services.Blurb]}" Style="{StaticResource PageBlurb}" />
+          <TextBlock Text="{Binding Status}" Style="{StaticResource MutedText}"
+                     TextWrapping="Wrap" Margin="0,4,0,0" MaxHeight="40" TextTrimming="CharacterEllipsis" />
+          <TextBlock Text="{Binding Summary}" Foreground="{DynamicResource BrushAccent}"
+                     FontSize="12" Margin="0,6,0,0" TextWrapping="Wrap" />
+        </StackPanel>
+      </DockPanel>
+    </Border>
+
+    <DockPanel Grid.Row="1" Margin="0,0,0,10" LastChildFill="True">
+      <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0,0,0">
+        <Button Content="CPU ↓" Command="{Binding SortCpuDescCommand}" Style="{StaticResource SortOptionButton}" />
+        <Button Content="CPU ↑" Command="{Binding SortCpuAscCommand}" Style="{StaticResource SortOptionButton}" />
+        <Button Content="RAM ↓" Command="{Binding SortRamDescCommand}" Style="{StaticResource SortOptionButton}" />
+        <Button Content="RAM ↑" Command="{Binding SortRamAscCommand}" Style="{StaticResource SortOptionButton}" Margin="0" />
+      </StackPanel>
+      <WrapPanel VerticalAlignment="Center">
+        <TextBox Width="220" Margin="0,0,10,0"
+                 Style="{StaticResource SearchTextBox}"
+                 Text="{Binding Filter, UpdateSourceTrigger=PropertyChanged}"
+                 Tag="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Services.SearchPlaceholder]}"
+                 ToolTip="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Services.SearchPlaceholder]}" />
+        <CheckBox Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Services.Running]}" IsChecked="{Binding OnlyRunning}" Margin="0,0,12,0" VerticalAlignment="Center" />
+        <CheckBox Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Services.WithRam]}" IsChecked="{Binding OnlyWithRam}" Margin="0,0,12,0" VerticalAlignment="Center" />
+        <CheckBox Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Services.HideCritical]}" IsChecked="{Binding HideCritical}" VerticalAlignment="Center" />
+      </WrapPanel>
+    </DockPanel>
+
+    <Border Grid.Row="2" Background="{DynamicResource BrushSurface}" CornerRadius="12" BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1">
+      <DockPanel>
+        <Border DockPanel.Dock="Top" Style="{StaticResource AetherTableHeader}">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="2*" />
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="90" />
+              <ColumnDefinition Width="90" />
+              <ColumnDefinition Width="60" />
+              <ColumnDefinition Width="70" />
+              <ColumnDefinition Width="60" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Services.HeaderName]}" Foreground="{DynamicResource BrushMuted}" FontWeight="SemiBold" FontSize="11" />
+            <TextBlock Grid.Column="1" Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Services.HeaderService]}" Foreground="{DynamicResource BrushMuted}" FontWeight="SemiBold" FontSize="11" />
+            <TextBlock Grid.Column="2" Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Services.HeaderStatus]}" Foreground="{DynamicResource BrushMuted}" FontWeight="SemiBold" FontSize="11" />
+            <TextBlock Grid.Column="3" Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Services.HeaderStartup]}" Foreground="{DynamicResource BrushMuted}" FontWeight="SemiBold" FontSize="11" />
+            <TextBlock Grid.Column="4" Text="CPU" Foreground="{DynamicResource BrushMuted}" FontWeight="SemiBold" FontSize="11" />
+            <TextBlock Grid.Column="5" Text="RAM" Foreground="{DynamicResource BrushMuted}" FontWeight="SemiBold" FontSize="11" />
+            <TextBlock Grid.Column="6" Text="PID" Foreground="{DynamicResource BrushMuted}" FontWeight="SemiBold" FontSize="11" />
+          </Grid>
+        </Border>
+        <ListBox ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedRow}"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 VirtualizingPanel.IsVirtualizing="True"
+                 VirtualizingPanel.VirtualizationMode="Recycling">
+          <ListBox.ItemsPanel>
+            <ItemsPanelTemplate>
+              <VirtualizingStackPanel />
+            </ItemsPanelTemplate>
+          </ListBox.ItemsPanel>
+          <ListBox.ItemContainerStyle>
+            <Style TargetType="ListBoxItem">
+              <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+              <Setter Property="Padding" Value="0" />
+              <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+              <Setter Property="Template">
+                <Setter.Value>
+                  <ControlTemplate TargetType="ListBoxItem">
+                    <Border x:Name="bd" Background="Transparent" Padding="12,8" BorderBrush="#12FFFFFF" BorderThickness="0,0,0,1">
+                      <ContentPresenter />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                      <Trigger Property="IsMouseOver" Value="True">
+                        <Setter TargetName="bd" Property="Background" Value="#14FFFFFF" />
+                      </Trigger>
+                      <Trigger Property="IsSelected" Value="True">
+                        <Setter TargetName="bd" Property="Background" Value="#223BA4FF" />
+                      </Trigger>
+                    </ControlTemplate.Triggers>
+                  </ControlTemplate>
+                </Setter.Value>
+              </Setter>
+            </Style>
+          </ListBox.ItemContainerStyle>
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="2*" />
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="90" />
+                  <ColumnDefinition Width="90" />
+                  <ColumnDefinition Width="60" />
+                  <ColumnDefinition Width="70" />
+                  <ColumnDefinition Width="60" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding DisplayName}" Foreground="{DynamicResource BrushText}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="1" Text="{Binding Name}" Style="{StaticResource MutedText}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="2" Text="{Binding Status}" Foreground="{DynamicResource BrushAccent}" FontSize="11" />
+                <TextBlock Grid.Column="3" Text="{Binding StartType}" Style="{StaticResource MutedText}" FontSize="11" />
+                <TextBlock Grid.Column="4" Text="{Binding CpuLabel}" Foreground="{DynamicResource BrushText}" />
+                <TextBlock Grid.Column="5" Text="{Binding RamLabel}" Foreground="{DynamicResource BrushText}" />
+                <TextBlock Grid.Column="6" Text="{Binding PidLabel}" Style="{StaticResource MutedText}" />
+              </Grid>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </DockPanel>
+    </Border>
+
+    <Border Grid.Row="3" Style="{StaticResource GlassCardLite}" Margin="0,10,0,0" Padding="14">
+      <TextBlock Text="{Binding Detail}" TextWrapping="Wrap"
+                 Foreground="{DynamicResource BrushText}" FontSize="12"
+                 MaxHeight="72" TextTrimming="CharacterEllipsis" />
+    </Border>
+
+    <Border Grid.Row="0" Grid.RowSpan="4" Background="{DynamicResource BrushNav}"
+            Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}"
+            IsHitTestVisible="True">
+      <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Services.Loading]}" FontSize="16" FontWeight="SemiBold"
+                 Foreground="{DynamicResource BrushText}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+    </Border>
+  </Grid>
+</UserControl>

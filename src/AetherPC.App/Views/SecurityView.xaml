@@ -1,0 +1,240 @@
+<UserControl x:Class="AetherPC.App.Views.SecurityView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:s="clr-namespace:AetherPC.App.Services"
+             xmlns:conv="clr-namespace:AetherPC.App.Converters"
+             Loaded="SecurityView_OnLoaded">
+  <UserControl.Resources>
+    <conv:InverseBoolConverter x:Key="InvertBool" />
+    <BooleanToVisibilityConverter x:Key="BoolVis" />
+  </UserControl.Resources>
+  <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <StackPanel HorizontalAlignment="Stretch" Margin="0,0,0,12">
+
+      <Border Style="{StaticResource PageHeaderBar}">
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <StackPanel Grid.Column="0" Style="{StaticResource PageHeaderTextColumn}">
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Page.Security]}"
+                       Style="{StaticResource PageTitle}" />
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Security.Blurb]}"
+                       Style="{StaticResource PageBlurb}" />
+          </StackPanel>
+          <Button Grid.Column="1"
+                  Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Security.Refresh]}"
+                  Command="{Binding LoadCommand}"
+                  Style="{StaticResource HeaderActionButton}"
+                  IsEnabled="{Binding IsBusy, Converter={StaticResource InvertBool}}" />
+        </Grid>
+      </Border>
+
+      <TextBlock Text="{Binding Status}" Style="{StaticResource MutedText}" Margin="0,0,0,10" TextWrapping="Wrap" />
+
+      <Border Style="{StaticResource GlassCard}" Padding="16" Margin="0,0,0,10">
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+          </Grid.ColumnDefinitions>
+          <Border Width="72" Height="72" CornerRadius="36" BorderThickness="3"
+                  BorderBrush="{Binding ScoreBrush}" Margin="0,0,16,0" VerticalAlignment="Center">
+            <TextBlock Text="{Binding Score}" FontSize="22" FontWeight="Bold"
+                       Foreground="{Binding ScoreBrush}"
+                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Border>
+          <StackPanel Grid.Column="1" VerticalAlignment="Center">
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Security.ScoreTitle]}"
+                       FontWeight="SemiBold" Foreground="{DynamicResource BrushText}" />
+            <TextBlock Text="{Binding Score, StringFormat={}{0} / 100}" Margin="0,4,0,0" FontSize="18" FontWeight="SemiBold"
+                       Foreground="{Binding ScoreBrush}" />
+            <TextBlock Text="{Binding ScoreLabel}" Style="{StaticResource MutedText}" Margin="0,2,0,0" />
+          </StackPanel>
+        </Grid>
+      </Border>
+
+      <Grid Margin="0,0,0,10">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="10" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Border Grid.Column="0" Style="{StaticResource GlassCard}" Padding="12">
+          <StackPanel>
+            <TextBlock Text="{Binding RisksTitle}" FontWeight="SemiBold" Foreground="{DynamicResource BrushText}" />
+            <ItemsControl ItemsSource="{Binding Risks}" Margin="0,8,0,0">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,0,0,4" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Security.Risks.Empty]}"
+                       Margin="0,8,0,0">
+              <TextBlock.Style>
+                <Style TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding HasRisks}" Value="False">
+                      <Setter Property="Visibility" Value="Visible" />
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </TextBlock.Style>
+            </TextBlock>
+          </StackPanel>
+        </Border>
+        <Border Grid.Column="2" Style="{StaticResource GlassCard}" Padding="12">
+          <StackPanel>
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Security.Recommendations]}"
+                       FontWeight="SemiBold" Foreground="{DynamicResource BrushText}" />
+            <ItemsControl ItemsSource="{Binding Recommendations}" Margin="0,8,0,0">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,0,0,4" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+      </Grid>
+
+      <ItemsControl ItemsSource="{Binding Cards}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <UniformGrid Columns="2" />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate>
+            <Border Style="{StaticResource GlassCard}" Padding="12" Margin="0,0,8,8">
+              <StackPanel>
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Grid.Column="0" Text="{Binding Glyph}" FontSize="16"
+                             VerticalAlignment="Center" Margin="0,0,8,0" />
+                  <TextBlock Grid.Column="1" Text="{Binding Title}" FontWeight="SemiBold" FontSize="14"
+                             Foreground="{DynamicResource BrushText}" VerticalAlignment="Center"
+                             TextWrapping="Wrap" Margin="0,0,8,0" />
+                  <Border Grid.Column="2" CornerRadius="8" Padding="10,4"
+                          Background="{DynamicResource BrushSurfaceSoft}"
+                          BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1"
+                          VerticalAlignment="Top" MaxWidth="140">
+                    <TextBlock Text="{Binding StatusText}" FontSize="12" FontWeight="SemiBold"
+                               Foreground="{Binding StatusBrush}" TextWrapping="Wrap"
+                               TextAlignment="Center" />
+                  </Border>
+                </Grid>
+                <TextBlock Text="{Binding Description}" Style="{StaticResource MutedText}"
+                           FontSize="13" Margin="0,8,0,0" TextWrapping="Wrap" />
+                <TextBlock Text="{Binding Detail}" Foreground="{DynamicResource BrushText}"
+                           FontSize="13.5" Margin="0,6,0,0" TextWrapping="Wrap" />
+                <TextBlock Margin="0,4,0,0" Foreground="{DynamicResource BrushSecondaryText}" FontSize="13"
+                           Text="{Binding Importance}" TextWrapping="Wrap" />
+                <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Security.WhatIsThis]}"
+                        Command="{Binding ToggleExplainCommand}"
+                        Style="{StaticResource ActionOptionButton}"
+                        HorizontalAlignment="Left" Margin="0,10,0,0" Padding="12,6" />
+                <TextBlock Text="{Binding Explain}"
+                           Foreground="{DynamicResource BrushAccent}"
+                           FontSize="13.5" FontWeight="SemiBold"
+                           TextWrapping="Wrap" Margin="0,8,0,0" LineHeight="20"
+                           Visibility="{Binding IsExpanded, Converter={StaticResource BoolVis}}" />
+              </StackPanel>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+
+      <Border Style="{StaticResource GlassCard}" Padding="12" Margin="0,2,0,10">
+        <StackPanel>
+          <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Security.Actions]}"
+                     FontWeight="SemiBold" Foreground="{DynamicResource BrushText}" />
+          <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Security.ActionsHint]}"
+                     Style="{StaticResource MutedText}" Margin="0,4,0,8" TextWrapping="Wrap" />
+          <WrapPanel>
+            <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Security.Open]}"
+                    Command="{Binding OpenWindowsSecurityCommand}" Style="{StaticResource SecondaryButton}" Margin="0,0,8,8" />
+            <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Security.OpenFirewall]}"
+                    Command="{Binding OpenFirewallCommand}" Style="{StaticResource SecondaryButton}" Margin="0,0,8,8" />
+            <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Security.OpenBitLocker]}"
+                    Command="{Binding OpenBitLockerCommand}" Style="{StaticResource SecondaryButton}" Margin="0,0,8,8" />
+            <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Security.OpenUpdate]}"
+                    Command="{Binding OpenWindowsUpdateCommand}" Style="{StaticResource SecondaryButton}" Margin="0,0,8,8" />
+            <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Security.OpenCore]}"
+                    Command="{Binding OpenCoreIsolationCommand}" Style="{StaticResource SecondaryButton}" Margin="0,0,8,8" />
+          </WrapPanel>
+        </StackPanel>
+      </Border>
+
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="10" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Border Grid.Column="0" Style="{StaticResource GlassCard}" Padding="12">
+          <StackPanel>
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Security.DeviceInfo]}"
+                       FontWeight="SemiBold" Foreground="{DynamicResource BrushText}" TextWrapping="Wrap" />
+            <ItemsControl ItemsSource="{Binding DeviceInfo}" Margin="0,8,0,0"
+                          Grid.IsSharedSizeScope="True">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="Auto" SharedSizeGroup="SecDevKey" />
+                      <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="{Binding Key}" Style="{StaticResource MutedText}"
+                               TextWrapping="Wrap" MaxWidth="150" Margin="0,0,12,0"
+                               VerticalAlignment="Top" />
+                    <TextBlock Grid.Column="1" Text="{Binding Value}"
+                               Foreground="{DynamicResource BrushText}"
+                               TextWrapping="Wrap" VerticalAlignment="Top" />
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+        <Border Grid.Column="2" Style="{StaticResource GlassCard}" Padding="12">
+          <StackPanel>
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Security.History]}"
+                       FontWeight="SemiBold" Foreground="{DynamicResource BrushText}" />
+            <ItemsControl ItemsSource="{Binding History}" Margin="0,8,0,0">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <DockPanel Margin="0,0,0,4">
+                    <TextBlock DockPanel.Dock="Right" FontWeight="SemiBold" Foreground="{DynamicResource BrushAccent}"
+                               Text="{Binding Score, StringFormat={}{0}/100}" />
+                    <TextBlock Text="{Binding At, StringFormat={}{0:g}}" Style="{StaticResource MutedText}" />
+                  </DockPanel>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Security.HistoryEmpty]}"
+                       Margin="0,8,0,0">
+              <TextBlock.Style>
+                <Style TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding HasHistory}" Value="False">
+                      <Setter Property="Visibility" Value="Visible" />
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </TextBlock.Style>
+            </TextBlock>
+          </StackPanel>
+        </Border>
+      </Grid>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

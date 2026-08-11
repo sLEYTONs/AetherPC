@@ -1,0 +1,112 @@
+<UserControl x:Class="AetherPC.App.Views.HistoryView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:s="clr-namespace:AetherPC.App.Services"
+             xmlns:conv="clr-namespace:AetherPC.App.Converters"
+             Loaded="HistoryView_OnLoaded">
+  <UserControl.Resources>
+    <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    <conv:InverseBoolConverter x:Key="InvertBool" />
+  </UserControl.Resources>
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+
+    <Border Grid.Row="0" Style="{StaticResource PageHeaderBar}">
+      <DockPanel LastChildFill="True">
+        <Button DockPanel.Dock="Right" Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Common.Refresh]}" Command="{Binding LoadCommand}"
+                Style="{StaticResource HeaderActionButton}" Margin="12,0,0,0" />
+        <StackPanel>
+          <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Page.History]}" Style="{StaticResource PageTitle}" />
+          <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[History.Blurb]}" Style="{StaticResource PageBlurb}" />
+          <TextBlock Text="{Binding Status}" Style="{StaticResource MutedText}" Margin="0,4,0,0" />
+        </StackPanel>
+      </DockPanel>
+    </Border>
+
+    <Border Grid.Row="1" Background="{DynamicResource BrushSurface}" CornerRadius="12" BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1">
+      <ListBox ItemsSource="{Binding Items}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+        <ListBox.ItemContainerStyle>
+          <Style TargetType="ListBoxItem">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Template">
+              <Setter.Value>
+                <ControlTemplate TargetType="ListBoxItem">
+                  <Border x:Name="bd" Background="Transparent" Margin="4,3" Padding="12,10"
+                          CornerRadius="10" BorderBrush="{DynamicResource BrushBorderSubtle}" BorderThickness="1">
+                    <ContentPresenter />
+                  </Border>
+                  <ControlTemplate.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                      <Setter TargetName="bd" Property="Background" Value="#14FFFFFF" />
+                    </Trigger>
+                    <Trigger Property="IsSelected" Value="True">
+                      <Setter TargetName="bd" Property="Background" Value="#223BA4FF" />
+                    </Trigger>
+                  </ControlTemplate.Triggers>
+                </ControlTemplate>
+              </Setter.Value>
+            </Setter>
+          </Style>
+        </ListBox.ItemContainerStyle>
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+              <StackPanel Grid.Column="0">
+                <TextBlock Text="{Binding ResolvedTitle}" FontWeight="SemiBold" Foreground="{DynamicResource BrushText}" TextWrapping="Wrap" />
+                <TextBlock Margin="0,4,0,0" Style="{StaticResource MutedText}">
+                  <TextBlock.Text>
+                    <MultiBinding StringFormat="{}{0} · {1}">
+                      <Binding Path="UserName" />
+                      <Binding Path="CreatedAt" />
+                    </MultiBinding>
+                  </TextBlock.Text>
+                </TextBlock>
+              </StackPanel>
+              <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <Border MinWidth="88" Height="28" CornerRadius="6" Padding="10,0" Margin="0,0,6,0"
+                        Background="#33F0A202" VerticalAlignment="Center"
+                        Visibility="{Binding IsBeastKind, Converter={StaticResource BoolToVis}}">
+                  <TextBlock Text="{Binding ResolvedKind}" FontSize="11" FontWeight="SemiBold" Foreground="#FFF0A202"
+                             VerticalAlignment="Center" HorizontalAlignment="Center" />
+                </Border>
+                <Border MinWidth="88" Height="28" CornerRadius="6" Padding="10,0" Margin="0,0,6,0"
+                        Background="#223BA4FF" VerticalAlignment="Center"
+                        Visibility="{Binding IsOptimizeKind, Converter={StaticResource BoolToVis}}">
+                  <TextBlock Text="{Binding ResolvedKind}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource BrushAccent}"
+                             VerticalAlignment="Center" HorizontalAlignment="Center" />
+                </Border>
+                <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[History.Revert]}"
+                        MinWidth="88" MinHeight="28" Padding="10,4" Margin="0,0,6,0"
+                        Command="{Binding DataContext.RollbackCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        CommandParameter="{Binding}"
+                        Style="{StaticResource WarningButton}"
+                        Visibility="{Binding ShowReversible, Converter={StaticResource BoolToVis}}"
+                        IsEnabled="{Binding RolledBack, Converter={StaticResource InvertBool}}" />
+                <Border MinWidth="88" Height="28" CornerRadius="6" Padding="10,0" Margin="0,0,6,0"
+                        Background="#3322C55E" VerticalAlignment="Center"
+                        Visibility="{Binding ShowReversible, Converter={StaticResource BoolToVis}}">
+                  <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[History.Reversible]}" FontSize="11"
+                             Foreground="{DynamicResource BrushOk}" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                </Border>
+                <Border MinWidth="88" Height="28" CornerRadius="6" Padding="10,0"
+                        Background="#33F0A202" VerticalAlignment="Center"
+                        Visibility="{Binding RolledBack, Converter={StaticResource BoolToVis}}">
+                  <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[History.RolledBack]}" FontSize="11"
+                             Foreground="{DynamicResource BrushWarn}" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                </Border>
+              </StackPanel>
+            </Grid>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+    </Border>
+  </Grid>
+</UserControl>

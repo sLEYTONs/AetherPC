@@ -1,0 +1,204 @@
+<UserControl x:Class="AetherPC.App.Views.ProcessesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:s="clr-namespace:AetherPC.App.Services"
+             Loaded="ProcessesView_OnLoaded">
+  <UserControl.Resources>
+    <BooleanToVisibilityConverter x:Key="BoolToVis" />
+  </UserControl.Resources>
+
+  <Grid HorizontalAlignment="Stretch">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <Border Grid.Row="0" Style="{StaticResource PageHeaderBar}">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <StackPanel Margin="0,0,12,0">
+          <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Page.Processes]}" Style="{StaticResource PageTitle}" />
+          <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Processes.Blurb]}" Style="{StaticResource PageBlurb}" />
+          <TextBlock Text="{Binding Status}" Style="{StaticResource MutedText}"
+                     TextWrapping="Wrap" Margin="0,4,0,0" MaxHeight="40" TextTrimming="CharacterEllipsis" />
+          <TextBlock Text="{Binding SelectionSummary}" Foreground="{DynamicResource BrushOk}"
+                     FontSize="12" Margin="0,6,0,0" FontWeight="SemiBold" />
+        </StackPanel>
+        <Button Grid.Column="1" Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Common.Refresh]}" Style="{StaticResource HeaderActionButton}"
+                Click="BtnRefresh_OnClick" />
+      </Grid>
+    </Border>
+
+    <WrapPanel Grid.Row="1" Margin="0,0,0,10">
+      <TextBox MinWidth="160" MaxWidth="320" Width="220" Margin="0,0,8,6"
+               Style="{StaticResource SearchTextBox}"
+               Text="{Binding Filter, UpdateSourceTrigger=PropertyChanged}"
+               ToolTip="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Processes.SearchTip]}" />
+
+      <!-- Orden CPU / RAM con flechas -->
+      <Border Background="{DynamicResource BrushSurfaceSoft}" CornerRadius="10" Padding="8,4" Margin="0,0,8,6"
+              BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1" VerticalAlignment="Center">
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="CPU" Foreground="{DynamicResource BrushMuted}" FontSize="11"
+                     VerticalAlignment="Center" Margin="0,0,6,0" FontWeight="SemiBold" />
+          <Button Content="↑" Command="{Binding SortCpuUpCommand}" Style="{StaticResource SortArrowButton}"
+                  ToolTip="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Processes.SortCpuAscTip]}" />
+          <Button Content="↓" Command="{Binding SortCpuDownCommand}" Style="{StaticResource SortArrowButton}"
+                  ToolTip="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Processes.SortCpuDescTip]}" Margin="2,0,0,0" />
+          <TextBlock Text="{Binding CpuSortLabel}" Foreground="{DynamicResource BrushAccent}" FontSize="11"
+                     VerticalAlignment="Center" Margin="8,0,0,0" MinWidth="48" />
+        </StackPanel>
+      </Border>
+      <Border Background="{DynamicResource BrushSurfaceSoft}" CornerRadius="10" Padding="8,4" Margin="0,0,8,6"
+              BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1" VerticalAlignment="Center">
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="RAM" Foreground="{DynamicResource BrushMuted}" FontSize="11"
+                     VerticalAlignment="Center" Margin="0,0,6,0" FontWeight="SemiBold" />
+          <Button Content="↑" Command="{Binding SortRamUpCommand}" Style="{StaticResource SortArrowButton}"
+                  ToolTip="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Processes.SortRamAscTip]}" />
+          <Button Content="↓" Command="{Binding SortRamDownCommand}" Style="{StaticResource SortArrowButton}"
+                  ToolTip="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Processes.SortRamDescTip]}" Margin="2,0,0,0" />
+          <TextBlock Text="{Binding RamSortLabel}" Foreground="{DynamicResource BrushAccent}" FontSize="11"
+                     VerticalAlignment="Center" Margin="8,0,0,0" MinWidth="48" />
+        </StackPanel>
+      </Border>
+
+      <CheckBox Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Processes.HighCpu]}" IsChecked="{Binding OnlyHighCpu}" Margin="0,0,12,6" VerticalAlignment="Center" />
+      <CheckBox Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Processes.Background]}" IsChecked="{Binding OnlyBackground}" Margin="0,0,12,6" VerticalAlignment="Center" />
+      <CheckBox Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Processes.HideProtected]}" IsChecked="{Binding HideProtected}" Margin="0,0,12,6" VerticalAlignment="Center" />
+      <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Processes.Mark]}" Command="{Binding CheckAllVisibleCommand}" Style="{StaticResource CompactButton}" Margin="0,0,6,6" />
+      <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Processes.Unmark]}" Command="{Binding UncheckAllCommand}" Style="{StaticResource CompactButton}" Margin="0,0,6,6" />
+    </WrapPanel>
+
+    <Border Grid.Row="2" Background="{DynamicResource BrushSurface}" CornerRadius="12"
+            BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1" Padding="2">
+      <DockPanel>
+        <!-- Cabecera clicable -->
+        <Border DockPanel.Dock="Top" Background="{DynamicResource BrushInputBg}" Padding="14,8" Margin="4,4,4,0" CornerRadius="8">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="28" />
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="88" />
+              <ColumnDefinition Width="96" />
+              <ColumnDefinition Width="100" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="1" Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Processes.HeaderName]}" Foreground="{DynamicResource BrushMuted}" FontSize="11" FontWeight="SemiBold" />
+            <Button Grid.Column="2" Command="{Binding SortByCpuCommand}" Style="{StaticResource SortHeaderButton}"
+                    HorizontalAlignment="Left">
+              <TextBlock Text="{Binding CpuSortLabel}" FontSize="11" FontWeight="SemiBold" />
+            </Button>
+            <Button Grid.Column="3" Command="{Binding SortByRamCommand}" Style="{StaticResource SortHeaderButton}"
+                    HorizontalAlignment="Left">
+              <TextBlock Text="{Binding RamSortLabel}" FontSize="11" FontWeight="SemiBold" />
+            </Button>
+            <TextBlock Grid.Column="4" Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Processes.HeaderType]}" Foreground="{DynamicResource BrushMuted}" FontSize="11" FontWeight="SemiBold"
+                       HorizontalAlignment="Right" />
+          </Grid>
+        </Border>
+
+        <ListBox ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedRow}"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                 VirtualizingPanel.IsVirtualizing="True"
+                 VirtualizingPanel.VirtualizationMode="Recycling"
+                 ScrollViewer.CanContentScroll="True">
+          <ListBox.ItemsPanel>
+            <ItemsPanelTemplate>
+              <VirtualizingStackPanel />
+            </ItemsPanelTemplate>
+          </ListBox.ItemsPanel>
+          <ListBox.ItemContainerStyle>
+            <Style TargetType="ListBoxItem">
+              <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+              <Setter Property="Padding" Value="0" />
+              <Setter Property="Margin" Value="0" />
+              <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+              <Setter Property="Template">
+                <Setter.Value>
+                  <ControlTemplate TargetType="ListBoxItem">
+                    <Border x:Name="bd" Background="Transparent" CornerRadius="6" Margin="2,1" Padding="0">
+                      <ContentPresenter />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                      <Trigger Property="IsSelected" Value="True">
+                        <Setter TargetName="bd" Property="Background" Value="#223BA4FF" />
+                      </Trigger>
+                      <Trigger Property="IsMouseOver" Value="True">
+                        <Setter TargetName="bd" Property="Background" Value="#14FFFFFF" />
+                      </Trigger>
+                    </ControlTemplate.Triggers>
+                  </ControlTemplate>
+                </Setter.Value>
+              </Setter>
+            </Style>
+          </ListBox.ItemContainerStyle>
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <Border Background="{DynamicResource BrushRow}" CornerRadius="8" Margin="4,2" Padding="10,8"
+                      BorderBrush="{DynamicResource BrushBorderSubtle}" BorderThickness="1">
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="28" />
+                    <ColumnDefinition Width="*" MinWidth="80" />
+                    <ColumnDefinition Width="88" />
+                    <ColumnDefinition Width="96" />
+                    <ColumnDefinition Width="100" />
+                  </Grid.ColumnDefinitions>
+                  <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            VerticalAlignment="Center" ToolTip="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Processes.CheckToCloseTip]}" />
+                  <StackPanel Grid.Column="1" Margin="0,0,8,0" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="13"
+                               Foreground="{DynamicResource BrushText}" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text="{Binding MetaLine}" FontSize="11" Foreground="{DynamicResource BrushMuted}"
+                               TextTrimming="CharacterEllipsis" Margin="0,2,0,0" />
+                  </StackPanel>
+                  <TextBlock Grid.Column="2" Text="{Binding CpuLabel}" FontWeight="SemiBold"
+                             Foreground="{DynamicResource BrushAccent}" FontSize="13" VerticalAlignment="Center" />
+                  <TextBlock Grid.Column="3" Text="{Binding RamLabel}" FontWeight="SemiBold"
+                             Foreground="{DynamicResource BrushText}" FontSize="13" VerticalAlignment="Center" />
+                  <Border Grid.Column="4" CornerRadius="6" Padding="6,3" VerticalAlignment="Center" HorizontalAlignment="Right"
+                          Background="#22000000" BorderThickness="1" BorderBrush="{DynamicResource BrushBorder}">
+                    <TextBlock Text="{Binding Category}" FontSize="10" FontWeight="SemiBold"
+                               Foreground="{DynamicResource BrushMuted}" />
+                  </Border>
+                </Grid>
+              </Border>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </DockPanel>
+    </Border>
+
+    <Border Grid.Row="3" Style="{StaticResource GlassCardLite}" Margin="0,10,0,0" Padding="14">
+      <DockPanel LastChildFill="True">
+        <WrapPanel DockPanel.Dock="Right" Style="{StaticResource ButtonRowPanel}" HorizontalAlignment="Right">
+          <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Processes.CloseMarked]}" Style="{StaticResource DangerButton}" Margin="0,0,8,6"
+                  MinWidth="120" Click="BtnClose_OnClick" />
+          <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Processes.LowerPriority]}" Style="{StaticResource SecondaryButton}" Margin="0,0,8,6"
+                  Click="BtnPriority_OnClick" />
+          <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Processes.Suspend]}" Style="{StaticResource WarningButton}" Margin="0,0,8,6"
+                  Click="BtnSuspend_OnClick" />
+          <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Processes.Location]}" Style="{StaticResource TertiaryButton}" Margin="0,0,0,6"
+                  Command="{Binding OpenLocationCommand}" />
+        </WrapPanel>
+        <TextBlock Text="{Binding Detail}" TextWrapping="Wrap" Foreground="{DynamicResource BrushText}" FontSize="12"
+                   VerticalAlignment="Center" MaxHeight="56" TextTrimming="CharacterEllipsis" Margin="0,0,16,0" />
+      </DockPanel>
+    </Border>
+
+    <Border Grid.Row="0" Grid.RowSpan="4" Background="{DynamicResource BrushNav}"
+            Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}" IsHitTestVisible="True">
+      <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+        <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Processes.Loading]}" FontSize="16" FontWeight="SemiBold"
+                   Foreground="{DynamicResource BrushText}" HorizontalAlignment="Center" />
+        <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Processes.Sampling]}" Style="{StaticResource MutedText}" Margin="0,8,0,0" HorizontalAlignment="Center" />
+      </StackPanel>
+    </Border>
+  </Grid>
+</UserControl>

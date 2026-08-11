@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{78F69A7A-F787-4D64-9DB6-B8A72E23DFB5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AetherPC.Infrastructure", "src\AetherPC.Infrastructure\AetherPC.Infrastructure.csproj", "{3FD4E91C-A19E-497D-AEDE-055CCD383088}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AetherPC.App", "src\AetherPC.App\AetherPC.App.csproj", "{6614D5D3-28A5-4F3F-84F6-3ACF25430F5B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3FD4E91C-A19E-497D-AEDE-055CCD383088}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3FD4E91C-A19E-497D-AEDE-055CCD383088}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3FD4E91C-A19E-497D-AEDE-055CCD383088}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3FD4E91C-A19E-497D-AEDE-055CCD383088}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6614D5D3-28A5-4F3F-84F6-3ACF25430F5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6614D5D3-28A5-4F3F-84F6-3ACF25430F5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6614D5D3-28A5-4F3F-84F6-3ACF25430F5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6614D5D3-28A5-4F3F-84F6-3ACF25430F5B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3FD4E91C-A19E-497D-AEDE-055CCD383088} = {78F69A7A-F787-4D64-9DB6-B8A72E23DFB5}
+		{6614D5D3-28A5-4F3F-84F6-3ACF25430F5B} = {78F69A7A-F787-4D64-9DB6-B8A72E23DFB5}
+	EndGlobalSection
+EndGlobal

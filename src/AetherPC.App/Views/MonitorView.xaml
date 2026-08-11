@@ -1,0 +1,296 @@
+<UserControl x:Class="AetherPC.App.Views.MonitorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:s="clr-namespace:AetherPC.App.Services">
+  <UserControl.Resources>
+    <BooleanToVisibilityConverter x:Key="BoolVis" />
+  </UserControl.Resources>
+
+  <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Margin="0,0,8,12">
+
+      <!-- Encabezado compacto -->
+      <Border Style="{StaticResource PageHeaderBar}">
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <StackPanel>
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Page.Monitor]}" Style="{StaticResource PageTitle}" />
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Monitor.Blurb]}"
+                       Style="{StaticResource MutedText}" Margin="0,2,0,0" TextWrapping="Wrap" />
+          </StackPanel>
+          <WrapPanel Grid.Column="1" Style="{StaticResource ButtonRowPanel}" VerticalAlignment="Top" HorizontalAlignment="Right">
+            <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Common.Refresh]}"
+                    Command="{Binding RefreshDisplayCommand}" Style="{StaticResource HeaderActionButton}" Margin="0,0,6,6" />
+            <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Monitor.Undo]}"
+                    Command="{Binding UndoCommand}" Style="{StaticResource SecondaryButton}" Margin="0,0,6,6" />
+            <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Monitor.Reset]}"
+                    Command="{Binding ResetSelectedDisplayCommand}" Style="{StaticResource DangerButton}" Margin="0,0,0,6" />
+          </WrapPanel>
+        </Grid>
+      </Border>
+
+      <TextBlock Text="{Binding Status}" Style="{StaticResource MutedText}" Margin="0,0,0,8" TextWrapping="Wrap" />
+
+      <!-- Segmentos: wrap en pantallas estrechas -->
+      <WrapPanel Style="{StaticResource ButtonRowPanel}" Margin="0,0,0,10">
+        <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Monitor.Tab.Screen]}"
+                Command="{Binding SelectSectionCommand}" CommandParameter="screen" Style="{StaticResource SortChipButton}" />
+        <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Monitor.Tab.Color]}"
+                Command="{Binding SelectSectionCommand}" CommandParameter="color" Style="{StaticResource SortChipButton}" />
+        <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Monitor.Tab.Info]}"
+                Command="{Binding SelectSectionCommand}" CommandParameter="info" Style="{StaticResource SortChipButton}" />
+      </WrapPanel>
+
+      <!-- ===== PANTALLA ===== -->
+      <StackPanel Visibility="{Binding IsScreen, Converter={StaticResource BoolVis}}">
+        <Border Style="{StaticResource GlassCardLite}">
+          <StackPanel>
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Monitor.SelectDisplay]}"
+                       FontWeight="SemiBold" Foreground="{DynamicResource BrushText}" Margin="0,0,0,8" />
+            <ItemsControl ItemsSource="{Binding Displays}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Button Margin="0,0,0,4" Padding="10,8" HorizontalContentAlignment="Left"
+                          Command="{Binding DataContext.SelectDisplayCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                          CommandParameter="{Binding}">
+                    <StackPanel>
+                      <TextBlock Text="{Binding FriendlyName}" FontWeight="SemiBold" />
+                      <TextBlock Style="{StaticResource MutedText}" FontSize="11">
+                        <Run Text="{Binding Width, Mode=OneWay}" /><Run Text="×" /><Run Text="{Binding Height, Mode=OneWay}" />
+                        <Run Text=" @ " /><Run Text="{Binding RefreshHz, Mode=OneWay}" /><Run Text=" Hz · " />
+                        <Run Text="{Binding ScalePercent, Mode=OneWay}" /><Run Text="%" />
+                      </TextBlock>
+                    </StackPanel>
+                  </Button>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+
+        <Border Style="{StaticResource GlassCardLite}" Visibility="{Binding HardwareBrightnessAvailable, Converter={StaticResource BoolVis}}">
+          <StackPanel>
+            <DockPanel>
+              <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Monitor.Brightness]}"
+                         FontWeight="SemiBold" Foreground="{DynamicResource BrushText}" />
+              <TextBlock DockPanel.Dock="Right" Text="{Binding HardwareBrightness, StringFormat={}{0}%}"
+                         Foreground="{DynamicResource BrushAccent}" FontWeight="SemiBold" />
+            </DockPanel>
+            <TextBlock Text="{Binding BrightnessHint}" Style="{StaticResource MutedText}" FontSize="11" Margin="0,4,0,8" />
+            <Slider Minimum="0" Maximum="100" Value="{Binding HardwareBrightness, UpdateSourceTrigger=PropertyChanged}"
+                    TickFrequency="5" IsSnapToTickEnabled="False" />
+          </StackPanel>
+        </Border>
+
+        <Border Style="{StaticResource GlassCardLite}"
+                Visibility="{Binding HardwareBrightnessUnavailable, Converter={StaticResource BoolVis}}">
+          <TextBlock Text="{Binding BrightnessHint}" Style="{StaticResource MutedText}" TextWrapping="Wrap" />
+        </Border>
+
+        <Border Style="{StaticResource GlassCardLite}">
+          <StackPanel>
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Monitor.Mode]}"
+                       FontWeight="SemiBold" Foreground="{DynamicResource BrushText}" Margin="0,0,0,6" />
+            <ComboBox ItemsSource="{Binding Modes}" SelectedItem="{Binding SelectedMode}"
+                      DisplayMemberPath="Label" Margin="0,0,0,8" />
+            <WrapPanel Style="{StaticResource ButtonRowPanel}">
+              <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Monitor.Mode.PreviewBtn]}"
+                      Command="{Binding BeginModePreviewCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,6,6" />
+              <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Monitor.OpenDisplaySettings]}"
+                      Command="{Binding OpenDisplaySettingsCommand}" Style="{StaticResource SecondaryButton}" Margin="0,0,0,6" />
+            </WrapPanel>
+            <StackPanel Margin="0,10,0,0" Visibility="{Binding ModePreviewActive, Converter={StaticResource BoolVis}}">
+              <TextBlock Foreground="{DynamicResource BrushWarn}" TextWrapping="Wrap">
+                <Run Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Monitor.Mode.PreviewLeft], Mode=OneWay}" />
+                <Run Text=" " /><Run Text="{Binding ModePreviewSeconds, Mode=OneWay}" /><Run Text="s" />
+              </TextBlock>
+              <WrapPanel Style="{StaticResource ButtonRowPanel}" Margin="0,6,0,0">
+                <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Monitor.Mode.Keep]}"
+                        Command="{Binding ConfirmModeCommand}" Style="{StaticResource SuccessButton}" Margin="0,0,6,6" />
+                <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Monitor.Mode.Revert]}"
+                        Command="{Binding RevertModeCommand}" Style="{StaticResource TertiaryButton}" Margin="0,0,0,6" />
+              </WrapPanel>
+            </StackPanel>
+          </StackPanel>
+        </Border>
+
+        <Border Style="{StaticResource GlassCardLite}">
+          <StackPanel>
+            <TextBlock Text="HDR / Night Light" FontWeight="SemiBold" Foreground="{DynamicResource BrushText}" Margin="0,0,0,6" />
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Monitor.Hdr.Hint]}"
+                       Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,0,0,8" />
+            <WrapPanel Style="{StaticResource ButtonRowPanel}">
+              <Button Content="HDR" Command="{Binding OpenHdrSettingsCommand}" Style="{StaticResource SecondaryButton}" Margin="0,0,6,6" />
+              <Button Content="Night Light" Command="{Binding OpenNightLightSettingsCommand}" Style="{StaticResource SecondaryButton}" Margin="0,0,6,6" />
+              <Button Content="ICC" Command="{Binding OpenColorManagementCommand}" Style="{StaticResource SecondaryButton}" Margin="0,0,0,6" />
+            </WrapPanel>
+          </StackPanel>
+        </Border>
+      </StackPanel>
+
+      <!-- ===== COLOR ===== -->
+      <StackPanel Visibility="{Binding IsColor, Converter={StaticResource BoolVis}}">
+        <TextBlock Text="{Binding CalibrationNote}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,0,0,8" />
+
+        <!-- Vista previa calibración -->
+        <Border Style="{StaticResource GlassCardLite}" Padding="8">
+          <StackPanel>
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Monitor.Preview]}"
+                       FontWeight="SemiBold" Foreground="{DynamicResource BrushText}" Margin="0,0,0,8" />
+            <Grid Height="28">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition /><ColumnDefinition /><ColumnDefinition /><ColumnDefinition />
+                <ColumnDefinition /><ColumnDefinition /><ColumnDefinition /><ColumnDefinition />
+              </Grid.ColumnDefinitions>
+              <Border Grid.Column="0" Background="#000000" />
+              <Border Grid.Column="1" Background="#242424" />
+              <Border Grid.Column="2" Background="#484848" />
+              <Border Grid.Column="3" Background="#6C6C6C" />
+              <Border Grid.Column="4" Background="#909090" />
+              <Border Grid.Column="5" Background="#B4B4B4" />
+              <Border Grid.Column="6" Background="#D8D8D8" />
+              <Border Grid.Column="7" Background="#FFFFFF" />
+            </Grid>
+            <UniformGrid Columns="6" Height="20" Margin="0,6,0,0">
+              <Border Background="#FF0000" /><Border Background="#00FF00" /><Border Background="#0000FF" />
+              <Border Background="#FFFF00" /><Border Background="#00FFFF" /><Border Background="#FF00FF" />
+            </UniformGrid>
+          </StackPanel>
+        </Border>
+
+        <Border Style="{StaticResource GlassCardLite}">
+          <StackPanel>
+            <DockPanel Margin="0,0,0,4">
+              <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Monitor.SoftBrightness]}" Foreground="{DynamicResource BrushText}" />
+              <TextBlock DockPanel.Dock="Right" Text="{Binding SoftBrightnessPct, StringFormat={}{0:F0}%}" Foreground="{DynamicResource BrushAccent}" />
+            </DockPanel>
+            <Slider Minimum="55" Maximum="100" Value="{Binding SoftBrightnessPct, UpdateSourceTrigger=PropertyChanged}" />
+
+            <DockPanel Margin="0,10,0,4">
+              <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Monitor.Attenuation]}" Foreground="{DynamicResource BrushText}" />
+              <TextBlock DockPanel.Dock="Right" Text="{Binding SoftAttenuationPct, StringFormat={}{0:F0}%}" Foreground="{DynamicResource BrushAccent}" />
+            </DockPanel>
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Monitor.Attenuation.Hint]}"
+                       Style="{StaticResource MutedText}" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,4" />
+            <Slider Minimum="0" Maximum="25" Value="{Binding SoftAttenuationPct, UpdateSourceTrigger=PropertyChanged}" />
+
+            <DockPanel Margin="0,10,0,4">
+              <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Monitor.Temp]}" Foreground="{DynamicResource BrushText}" />
+              <TextBlock DockPanel.Dock="Right" Text="{Binding ColorTempK, StringFormat={}{0} K}" Foreground="{DynamicResource BrushAccent}" />
+            </DockPanel>
+            <Slider Minimum="4200" Maximum="7500" TickFrequency="500" IsSnapToTickEnabled="True"
+                    Value="{Binding ColorTempK, UpdateSourceTrigger=PropertyChanged}" />
+
+            <DockPanel Margin="0,10,0,4">
+              <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Monitor.BlueLight]}" Foreground="{DynamicResource BrushText}" />
+              <TextBlock DockPanel.Dock="Right" Text="{Binding BlueLightPct, StringFormat={}{0:F0}%}" Foreground="{DynamicResource BrushAccent}" />
+            </DockPanel>
+            <Slider Minimum="0" Maximum="40" Value="{Binding BlueLightPct, UpdateSourceTrigger=PropertyChanged}" />
+
+            <DockPanel Margin="0,10,0,4">
+              <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Monitor.Contrast]}" Foreground="{DynamicResource BrushText}" />
+              <TextBlock DockPanel.Dock="Right" Text="{Binding SoftContrastPct, StringFormat={}{0:F0}%}" Foreground="{DynamicResource BrushAccent}" />
+            </DockPanel>
+            <Slider Minimum="70" Maximum="135" Value="{Binding SoftContrastPct, UpdateSourceTrigger=PropertyChanged}" />
+
+            <DockPanel Margin="0,10,0,4">
+              <TextBlock Text="Gamma" Foreground="{DynamicResource BrushText}" />
+              <TextBlock DockPanel.Dock="Right" Text="{Binding SoftGamma, StringFormat={}{0:F2}}" Foreground="{DynamicResource BrushAccent}" />
+            </DockPanel>
+            <Slider Minimum="0.90" Maximum="1.35" Value="{Binding SoftGamma, UpdateSourceTrigger=PropertyChanged}" />
+
+            <DockPanel Margin="0,10,0,4">
+              <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Monitor.Saturation]}" Foreground="{DynamicResource BrushText}" />
+              <TextBlock DockPanel.Dock="Right" Text="{Binding SoftSaturationPct, StringFormat={}{0:F0}%}" Foreground="{DynamicResource BrushAccent}" />
+            </DockPanel>
+            <Slider Minimum="65" Maximum="135" Value="{Binding SoftSaturationPct, UpdateSourceTrigger=PropertyChanged}" />
+          </StackPanel>
+        </Border>
+
+        <Expander Header="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Monitor.Rgb]}"
+                  IsExpanded="{Binding AdvancedColorOpen}" Margin="0,0,0,8"
+                  Foreground="{DynamicResource BrushText}">
+          <Border Style="{StaticResource GlassCardLite}" Margin="0,8,0,0">
+            <StackPanel>
+              <DockPanel Margin="0,0,0,4">
+                <TextBlock Text="R" Foreground="#FFFF6B6B" />
+                <TextBlock DockPanel.Dock="Right" Text="{Binding SoftRedPct, StringFormat={}{0:F0}%}" />
+              </DockPanel>
+              <Slider Minimum="75" Maximum="140" Value="{Binding SoftRedPct, UpdateSourceTrigger=PropertyChanged}" />
+              <DockPanel Margin="0,8,0,4">
+                <TextBlock Text="G" Foreground="#FF6BFF8A" />
+                <TextBlock DockPanel.Dock="Right" Text="{Binding SoftGreenPct, StringFormat={}{0:F0}%}" />
+              </DockPanel>
+              <Slider Minimum="75" Maximum="140" Value="{Binding SoftGreenPct, UpdateSourceTrigger=PropertyChanged}" />
+              <DockPanel Margin="0,8,0,4">
+                <TextBlock Text="B" Foreground="#FF6BA8FF" />
+                <TextBlock DockPanel.Dock="Right" Text="{Binding SoftBluePct, StringFormat={}{0:F0}%}" />
+              </DockPanel>
+              <Slider Minimum="75" Maximum="140" Value="{Binding SoftBluePct, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+          </Border>
+        </Expander>
+
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+          <CheckBox Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Monitor.Night]}"
+                    IsChecked="{Binding NightMode}" VerticalAlignment="Center" Margin="0,0,12,0" />
+          <Button Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Monitor.SoftReset]}"
+                  Command="{Binding ResetSoftCommand}" Style="{StaticResource DangerButton}" />
+        </StackPanel>
+      </StackPanel>
+
+      <!-- ===== INFO ===== -->
+      <StackPanel Visibility="{Binding IsInfo, Converter={StaticResource BoolVis}}">
+        <Border Style="{StaticResource GlassCardLite}">
+          <StackPanel DataContext="{Binding SelectedDisplay}">
+            <TextBlock FontWeight="SemiBold" Foreground="{DynamicResource BrushText}" Text="{Binding FriendlyName}" Margin="0,0,0,8" />
+            <TextBlock Style="{StaticResource MutedText}" Margin="0,2">
+              <Run Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Monitor.Info.Resolution], Mode=OneWay}" />
+              <Run Text=": " /><Run Text="{Binding Width, Mode=OneWay}" /><Run Text="×" /><Run Text="{Binding Height, Mode=OneWay}" />
+            </TextBlock>
+            <TextBlock Style="{StaticResource MutedText}" Margin="0,2">
+              <Run Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Monitor.Info.Refresh], Mode=OneWay}" />
+              <Run Text=": " /><Run Text="{Binding RefreshHz, Mode=OneWay}" /><Run Text=" Hz" />
+            </TextBlock>
+            <TextBlock Style="{StaticResource MutedText}" Margin="0,2">
+              <Run Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Monitor.Info.Scale], Mode=OneWay}" />
+              <Run Text=": " /><Run Text="{Binding ScalePercent, Mode=OneWay}" /><Run Text="%" />
+            </TextBlock>
+            <TextBlock Style="{StaticResource MutedText}" Margin="0,2">
+              <Run Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Monitor.Info.Bpp], Mode=OneWay}" />
+              <Run Text=": " /><Run Text="{Binding BitsPerPixel, Mode=OneWay}" />
+            </TextBlock>
+            <TextBlock Style="{StaticResource MutedText}" Margin="0,2">
+              <Run Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Monitor.Info.Adapter], Mode=OneWay}" />
+              <Run Text=": " /><Run Text="{Binding AdapterName, Mode=OneWay}" />
+            </TextBlock>
+            <TextBlock Style="{StaticResource MutedText}" Margin="0,2">
+              <Run Text="ICC: " /><Run Text="{Binding IccProfileName, Mode=OneWay}" />
+            </TextBlock>
+            <TextBlock Style="{StaticResource MutedText}" Margin="0,2">
+              <Run Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Monitor.Info.Id], Mode=OneWay}" />
+              <Run Text=": " /><Run Text="{Binding Id, Mode=OneWay}" />
+            </TextBlock>
+            <TextBlock Style="{StaticResource MutedText}" Margin="0,2">
+              <Run Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Monitor.Info.Source], Mode=OneWay}" />
+              <Run Text=": " /><Run Text="{Binding Source, Mode=OneWay}" />
+            </TextBlock>
+          </StackPanel>
+        </Border>
+        <Border Style="{StaticResource GlassCardLite}" Margin="0,8,0,0">
+          <StackPanel>
+            <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Monitor.Info.Caps]}"
+                       FontWeight="SemiBold" Foreground="{DynamicResource BrushText}" Margin="0,0,0,6" />
+            <TextBlock Style="{StaticResource MutedText}" Text="{Binding Capabilities.BrightnessSource, StringFormat=Brightness: {0}}" />
+            <TextBlock Style="{StaticResource MutedText}" Text="{Binding Capabilities.DdcCi, StringFormat=DDC/CI: {0}}" />
+            <TextBlock Style="{StaticResource MutedText}" Text="{Binding Capabilities.SoftwareGamma, StringFormat=Gamma ramp: {0}}" />
+          </StackPanel>
+        </Border>
+      </StackPanel>
+
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

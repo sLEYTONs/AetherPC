@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\Brand\AetherPC.ico</ApplicationIcon>
+    <RootNamespace>AetherPC.App</RootNamespace>
+    <AssemblyName>AetherPC</AssemblyName>
+    <Product>AetherPC</Product>
+    <Company>Sebastián Leyton</Company>
+    <Authors>Sebastián Leyton</Authors>
+    <Copyright>Copyright © Sebastián Leyton 2026</Copyright>
+    <Description>Asistente técnico avanzado para Windows: análisis, monitoreo y optimización.</Description>
+    <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/sLEYTONs/AetherPC</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/sLEYTONs/AetherPC</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <AssemblyTitle>AetherPC</AssemblyTitle>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <InformationalVersion>1.0.0</InformationalVersion>
+    <NeutralLanguage>es</NeutralLanguage>
+    <SatelliteResourceLanguages>en;es</SatelliteResourceLanguages>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+    <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0-rc2" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
+    <PackageReference Include="WPF-UI" Version="3.0.5" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AetherPC.Application\AetherPC.Application.csproj" />
+    <ProjectReference Include="..\AetherPC.Core\AetherPC.Core.csproj" />
+    <ProjectReference Include="..\AetherPC.Infrastructure\AetherPC.Infrastructure.csproj" />
+    <ProjectReference Include="..\AetherPC.Optimization\AetherPC.Optimization.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Logo oficial: master, transparente (UI) e ICO Windows -->
+    <Resource Include="Assets\Brand\AetherPC.png" />
+    <Resource Include="Assets\Brand\AetherPC-master.png" />
+    <Resource Include="Assets\Brand\AetherPC-transparent.png" />
+    <Resource Include="Assets\Brand\AetherPC.ico" />
+  </ItemGroup>
+</Project>

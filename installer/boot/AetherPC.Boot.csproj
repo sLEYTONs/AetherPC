@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>AetherPC</AssemblyName>
+    <RootNamespace>AetherPC.Boot</RootNamespace>
+    <ApplicationIcon>..\..\src\AetherPC.App\Assets\Brand\AetherPC.ico</ApplicationIcon>
+    <ApplicationManifest>..\..\src\AetherPC.App\app.manifest</ApplicationManifest>
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <Version>1.0.0</Version>
+    <Product>AetherPC</Product>
+    <Company>Sebastián Leyton</Company>
+    <Authors>Sebastián Leyton</Authors>
+    <Copyright>Copyright © Sebastián Leyton 2026</Copyright>
+  </PropertyGroup>
+</Project>

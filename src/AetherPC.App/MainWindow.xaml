@@ -1,0 +1,159 @@
+<ui:FluentWindow x:Class="AetherPC.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        xmlns:vm="clr-namespace:AetherPC.App.ViewModels"
+        xmlns:views="clr-namespace:AetherPC.App.Views"
+        xmlns:s="clr-namespace:AetherPC.App.Services"
+        Title="AetherPC"
+        Icon="pack://application:,,,/Assets/Brand/AetherPC.ico"
+        Width="1280" Height="800"
+        MinWidth="900" MinHeight="560"
+        WindowStartupLocation="Manual"
+        ExtendsContentIntoTitleBar="True"
+        WindowBackdropType="None"
+        Background="{DynamicResource BrushBg}"
+        Foreground="{DynamicResource BrushText}"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
+        Loaded="MainWindow_OnLoaded"
+        StateChanged="MainWindow_OnStateChanged">
+  <ui:FluentWindow.Resources>
+    <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    <DataTemplate DataType="{x:Type vm:WelcomeViewModel}">
+      <views:WelcomeView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
+      <views:DashboardView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:HardwareViewModel}">
+      <views:HardwareView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:MonitorViewModel}">
+      <views:MonitorView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:ProcessesViewModel}">
+      <views:ProcessesView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:ServicesViewModel}">
+      <views:ServicesView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:OptimizeViewModel}">
+      <views:OptimizeView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:BeastModeViewModel}">
+      <views:BeastModeView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:CleanupViewModel}">
+      <views:CleanupView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:BenchmarkViewModel}">
+      <views:BenchmarkView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:SecurityViewModel}">
+      <views:SecurityView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:DriversViewModel}">
+      <views:DriversView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:HistoryViewModel}">
+      <views:HistoryView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
+      <views:SettingsView />
+    </DataTemplate>
+  </ui:FluentWindow.Resources>
+
+  <Grid Background="{DynamicResource HeroGradient}"
+        HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+        UseLayoutRounding="True" SnapsToDevicePixels="True">
+    <!-- Contenido a ventana completa: la bienvenida se centra según la resolución real. -->
+    <Grid>
+      <!-- Header vacío: si Title queda en blanco, WPF-UI copia "AetherPC" del Window y se duplica sobre el logo. -->
+      <ui:TitleBar x:Name="ChromeTitleBar"
+                   Title=""
+                   Visibility="{Binding ShowSidebar, Converter={StaticResource BoolToVis}}">
+        <ui:TitleBar.Header>
+          <FrameworkElement Width="0" Height="0" Visibility="Collapsed" />
+        </ui:TitleBar.Header>
+      </ui:TitleBar>
+      <ContentControl Margin="{Binding ContentInset}"
+                      HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                      HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                      Content="{Binding CurrentPage}" />
+    </Grid>
+
+    <Border HorizontalAlignment="Left" Width="220"
+            Background="{DynamicResource BrushNav}"
+            BorderBrush="{DynamicResource BrushBorder}" BorderThickness="0,0,1,0"
+            VerticalAlignment="Stretch"
+            Visibility="{Binding ShowSidebar, Converter={StaticResource BoolToVis}}">
+      <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Margin="20,20,20,12">
+          <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+            <Image Source="pack://application:,,,/Assets/Brand/AetherPC-transparent.png"
+                   Width="36" Height="36" Stretch="Uniform" Margin="0,0,10,0"
+                   RenderOptions.BitmapScalingMode="HighQuality"
+                   SnapsToDevicePixels="True" />
+            <TextBlock Text="AetherPC" FontSize="26" FontWeight="Bold" Foreground="{DynamicResource BrushAccent}"
+                       FontFamily="Segoe UI Variable Display, Segoe UI" VerticalAlignment="Center" />
+          </StackPanel>
+          <TextBlock Text="{Binding Source={x:Static s:UiLoc.Instance}, Path=[App.Tagline]}"
+                     Style="{StaticResource MutedText}" Margin="0,4,0,0" />
+          <Border Margin="0,14,0,0" Padding="10,6" CornerRadius="8" Background="{DynamicResource BrushChip}">
+            <TextBlock Text="{Binding ElevationLabel}" Foreground="{DynamicResource BrushText}" FontSize="12" />
+          </Border>
+        </StackPanel>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel x:Name="NavPanel" Margin="4,8,4,16">
+            <Button Style="{StaticResource NavButton}" Tag="dashboard"
+                    Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Nav.Home]}"
+                    AutomationProperties.Name="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Nav.Home]}"
+                    Command="{Binding NavigateCommand}" CommandParameter="dashboard" />
+            <Button Style="{StaticResource NavButton}" Tag="hardware"
+                    Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Nav.Hardware]}"
+                    AutomationProperties.Name="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Nav.Hardware]}"
+                    Command="{Binding NavigateCommand}" CommandParameter="hardware" />
+            <Button Style="{StaticResource NavButton}" Tag="monitor"
+                    Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Nav.Monitor]}"
+                    AutomationProperties.Name="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Nav.Monitor]}"
+                    Command="{Binding NavigateCommand}" CommandParameter="monitor" />
+            <Button Style="{StaticResource NavButton}" Tag="processes"
+                    Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Nav.Processes]}"
+                    AutomationProperties.Name="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Nav.Processes]}"
+                    Command="{Binding NavigateCommand}" CommandParameter="processes" />
+            <Button Style="{StaticResource NavButton}" Tag="services"
+                    Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Nav.Services]}"
+                    AutomationProperties.Name="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Nav.Services]}"
+                    Command="{Binding NavigateCommand}" CommandParameter="services" />
+            <Button Style="{StaticResource NavButton}" Tag="optimize"
+                    Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Nav.Optimize]}"
+                    AutomationProperties.Name="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Nav.Optimize]}"
+                    Command="{Binding NavigateCommand}" CommandParameter="optimize" />
+            <Button Style="{StaticResource NavButton}" Tag="beast"
+                    Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Nav.Beast]}"
+                    AutomationProperties.Name="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Nav.Beast]}"
+                    Command="{Binding NavigateCommand}" CommandParameter="beast" />
+            <Button Style="{StaticResource NavButton}" Tag="cleanup"
+                    Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Nav.Cleanup]}"
+                    AutomationProperties.Name="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Nav.Cleanup]}"
+                    Command="{Binding NavigateCommand}" CommandParameter="cleanup" />
+            <Button Style="{StaticResource NavButton}" Tag="drivers"
+                    Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Nav.Drivers]}"
+                    AutomationProperties.Name="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Nav.Drivers]}"
+                    Command="{Binding NavigateCommand}" CommandParameter="drivers" />
+            <Button Style="{StaticResource NavButton}" Tag="history"
+                    Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Nav.History]}"
+                    AutomationProperties.Name="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Nav.History]}"
+                    Command="{Binding NavigateCommand}" CommandParameter="history" />
+            <Button Style="{StaticResource NavButton}" Tag="settings"
+                    Content="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Nav.Settings]}"
+                    AutomationProperties.Name="{Binding Source={x:Static s:UiLoc.Instance}, Path=[Nav.Settings]}"
+                    Command="{Binding NavigateCommand}" CommandParameter="settings" />
+          </StackPanel>
+        </ScrollViewer>
+      </DockPanel>
+    </Border>
+  </Grid>
+</ui:FluentWindow>
