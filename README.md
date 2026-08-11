@@ -73,6 +73,31 @@ Default install path: `C:\Program Files\AetherPC\`
 
 Settings and history are stored under `%LocalAppData%\AetherPC\`, not next to the executable.
 
+## Windows SmartScreen
+
+Because AetherPC is currently distributed without a trusted code-signing certificate, Windows may show a Microsoft Defender SmartScreen warning when running the Installer or Portable version for the first time.
+
+You may see:
+
+**Windows protected your PC**
+
+and:
+
+**Publisher: Unknown publisher**
+
+This does not refer to the GPL license. It means the executable is currently unsigned by a publisher certificate recognized by Windows.
+
+For transparency:
+
+- AetherPC is open source and its source code is available in this repository.
+- Official binaries are distributed through this repository’s [GitHub Releases](https://github.com/sLEYTONs/AetherPC/releases).
+- SHA-256 hashes are published with each release so downloaded files can be verified.
+- Users should only run AetherPC if the downloaded file matches the official release and they trust the software.
+
+If you choose to continue after verifying the file, use the options Windows itself provides for that dialog. Do not disable Microsoft Defender or SmartScreen.
+
+AetherPC may require administrator privileges for system-level optimization features. A future release may include code signing if a suitable certificate is available; that is not guaranteed for every update.
+
 ## Build from source
 
 ```bash
